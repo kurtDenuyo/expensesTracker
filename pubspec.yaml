@@ -23,6 +23,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^0.12.0
+  json_serializable: ^3.3.0
+  get_it: ^3.0.3
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -63,9 +66,49 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: Nunito
+    - family: Nunito-Black
       fonts:
-        - asset: assets/fonts/
+        - asset: assets/fonts/Nunito-Black.ttf
+    - family: Nunito-BlackItalic
+      fonts:
+          - asset: assets/fonts/Nunito-BlackItalic.ttf
+    - family: Nunito-Bold
+      fonts:
+          - asset: assets/fonts/Nunito-Bold.ttf
+    - family: Nunito-BoldItalic
+      fonts:
+          - asset: assets/fonts/Nunito-BoldItalic.ttf
+    - family: Nunito-ExtraBold
+      fonts:
+          - asset: assets/fonts/Nunito-ExtraBold.ttf
+    - family: Nunito-ExtraBoldItalic
+      fonts:
+           - asset: assets/fonts/Nunito-ExtraBoldItalic.ttf
+    - family: Nunito-ExtraLight
+      fonts:
+          - asset: assets/fonts/Nunito-ExtraLight.ttf
+    - family: Nunito-ExtraLightItalic
+      fonts:
+          - asset: assets/fonts/Nunito-ExtraLightItalic.ttf
+    - family: Nunito-Italic
+      fonts:
+          - asset: assets/fonts/Nunito-Italic.ttf
+    - family: Nunito-Light
+      fonts:
+           - asset: assets/fonts/Nunito-Light.ttf
+    - family: Nunito-LightItalic
+      fonts:
+           - asset: assets/fonts/Nunito-LightItalic.ttf
+    - family: Nunito-Regular
+      fonts:
+          - asset: assets/fonts/Nunito-Regular.ttf
+    - family: Nunito-SemiBold
+      fonts:
+          - asset: assets/fonts/Nunito-SemiBold.ttf
+    - family: Nunito-SemiBoldItalic
+      fonts:
+          - asset: assets/fonts/Nunito-SemiBoldItalic.ttf
+
   # fonts:
   #   - family: Schyler
   #     fonts:

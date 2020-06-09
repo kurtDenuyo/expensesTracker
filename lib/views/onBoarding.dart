@@ -1,5 +1,8 @@
+import 'package:expensestracker/views/registration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'loginPage.dart';
 
 class onBoarding extends StatefulWidget {
   onBoarding({Key key}) : super(key: key);
@@ -11,15 +14,14 @@ class _onBoardingState extends State<onBoarding>{
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.green[200],
+      color: Colors.green[100],
       child: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             SizedBox(
-              height: 10.0,
+              height: 60.0,
             ),
             SizedBox(
               height: 120.0,
@@ -34,9 +36,10 @@ class _onBoardingState extends State<onBoarding>{
             ),
             Text("WALLET",
             style: TextStyle(
+              fontFamily: 'Nunito-ExtraBold',
               fontSize: 30.0,
               fontWeight: FontWeight.bold,
-              color: Colors.green[800]
+              color: Colors.green[600]
               ),
             ),
             SizedBox(
@@ -44,7 +47,7 @@ class _onBoardingState extends State<onBoarding>{
             ),
             Text("Track your spending.",
               style: TextStyle(
-                fontFamily: 'Nunito',
+                fontFamily: 'Nunito-Regular',
                   fontSize: 16.0,
                  // fontWeight: FontWeight.bold,
                   color: Colors.black26,
@@ -55,7 +58,7 @@ class _onBoardingState extends State<onBoarding>{
             ),
             Text("Plan your budget.",
               style: TextStyle(
-                fontFamily: 'Nunito',
+                fontFamily: 'Nunito-Regular',
                 fontSize: 16.0,
                 //fontWeight: FontWeight.bold,
                 color: Colors.black26,
@@ -72,9 +75,14 @@ class _onBoardingState extends State<onBoarding>{
                 color: Colors.white70,
                 textColor: Colors.black,
                 onPressed: (){
-
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => Registration()),
+                  );
                 },
-                child: new Text("SIGN UP"),
+                child: new Text("SIGN UP",
+                style: TextStyle(
+                  fontFamily: 'Nunito-Bold',
+                  fontSize: 20.0
+                ),),
 
               ),
             ),
@@ -83,8 +91,10 @@ class _onBoardingState extends State<onBoarding>{
             ),
             new InkWell(
               onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()),
+                );
               },
-              child: new Text("I alrady have an account.",
+              child: new Text("I alreadyy have an account.",
                 style: TextStyle(
                   fontFamily: 'Nunito',
                   fontSize: 16.0,

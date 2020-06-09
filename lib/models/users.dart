@@ -1,21 +1,22 @@
+import 'package:flutter/foundation.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'users.g.dart';
+
+@JsonSerializable()
+
 class User {
-  String _username;
-  String _password;
-  User(this._username, this._password);
-
-  User.map(dynamic obj) {
-    this._username = obj["username"];
-    this._password = obj["password"];
+  String username;
+  String email;
+  String password;
+  User(
+  {
+    @required this.username,
+    @required this.email,
+    @required this.password
   }
 
-  String get username => _username;
-  String get password => _password;
+      );
 
-  Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
-    map["username"] = _username;
-    map["password"] = _password;
-
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$userToJson(this);
 }
