@@ -21,7 +21,7 @@ class _onBoardingState extends State<onBoarding>{
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             SizedBox(
-              height: 60.0,
+              height: 100.0,
             ),
             SizedBox(
               height: 120.0,
@@ -65,7 +65,7 @@ class _onBoardingState extends State<onBoarding>{
               ),
             ),
             SizedBox(
-              height: 100.0,
+              height: 200.0,
             ),
             SizedBox(
               height: 60.0,
@@ -94,7 +94,7 @@ class _onBoardingState extends State<onBoarding>{
                 Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()),
                 );
               },
-              child: new Text("I alreadyy have an account.",
+              child: new Text("I already have an account.",
                 style: TextStyle(
                   fontFamily: 'Nunito',
                   fontSize: 16.0,

@@ -1,5 +1,6 @@
 
 
+import 'package:expensestracker/Data/data_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -27,8 +28,7 @@ class HomeState extends State<Home> {
           SizedBox(height: 16),
           new GestureDetector(
             onTap: () {
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
-                  MyApp()), (Route<dynamic> route) => false);
+              Navigator.of(context).pop();
             },
             child: Text("    Log out"),
           ),
@@ -39,9 +39,10 @@ class HomeState extends State<Home> {
   }
   @override
   Widget build(BuildContext context) {
+      final category = dataProvider().getCategory();
       return WillPopScope(
         onWillPop: _onBackPressed,
-        child: new Scaffold(
+        child: Scaffold(
           appBar: AppBar(
             centerTitle: true,
             backgroundColor: Colors.teal,

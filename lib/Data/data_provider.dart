@@ -5,22 +5,38 @@ import 'package:http/http.dart' as http;
 import 'api_response.dart';
 
 class dataProvider {
-  static const API = 'http://petstore.swagger.io/v1';
+  static const API = 'http://expenses.koda.ws/';
 
-  Future<APIResponse<bool>> addUser(User user)
+  Future<http.Response> addUser(User user)
   {
-    return http.post(API + '/users/', body: json.encode(user.toJson())).then((data)
-    {
-      if (data.statusCode == 201)
-      {
-        print("status code 201");
-
-        return APIResponse<bool>(data: true);
-
-      }
-      print(data.statusCode);
-      return APIResponse<bool>(error: true, errorMessage: 'An error occured');
-    })
-        .catchError((_) => APIResponse<bool>(error: true, errorMessage: 'An error occured'));
+    return http.post(
+      API + 'api/v1/sign_up',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: json.encode(user.toJson())
+    );
+  }
+  Future<http.Response> loginUser(String email, String password)
+  {
+    return http.post(
+        API + 'api/v1/sign_in',
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: json.encode(<String, String>{
+          'email' : email,
+          'password' : password
+        })
+    );
+  }
+  Future<http.Response> getCategory()
+  {
+    return http.get(
+        API + 'api/v1/category',
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+    );
   }
 }

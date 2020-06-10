@@ -1,5 +1,7 @@
 
 
+import 'package:expensestracker/Data/data_provider.dart';
+import 'package:expensestracker/models/successUsers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -74,16 +76,15 @@ class _LoginPageState extends State<LoginPage>{
                             height: 30.0,
                           ),
                           SizedBox(
-                              height: 300.0,
+                              height: 400.0,
                               width: 300.0,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text("Email",
-                                    style: TextStyle(
-                                        fontFamily: 'Nunito-Regular'
-                                    ),),
                                   TextFormField(
+                                    decoration: InputDecoration(
+                                      labelText: "Email",
+                                    ),
                                     controller: _emailController,
                                     obscureText: false,
                                     validator: (value){
@@ -96,11 +97,10 @@ class _LoginPageState extends State<LoginPage>{
                                         fontFamily: 'Nunito-Regular'
                                     ),
                                   ),
-                                  Text("Password",
-                                    style: TextStyle(
-                                        fontFamily: 'Nunito-Regular'
-                                    ),),
                                   TextFormField(
+                                    decoration: InputDecoration(
+                                      labelText: "Password",
+                                    ),
                                     controller: _passwordController,
                                     obscureText: true,
                                     validator: (value){
@@ -123,11 +123,49 @@ class _LoginPageState extends State<LoginPage>{
                               padding: const EdgeInsets.all(8.0),
                               color: Colors.white70,
                               textColor: Colors.black,
-                              onPressed: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),
-                                );
+                              onPressed: () async{
+                                if(_formKey.currentState.validate())
+                                  {
+                                    final result = await dataProvider().loginUser(_emailController.text, _passwordController.text);
+                                    print(result.body);
+                                    print(result.statusCode);
+                                    if(result.statusCode==200)
+                                      {
+                                        //on success navigate to dashboard
+                                        print("Login success");
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),
+                                        );
+                                      }
+                                    else
+                                      {
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context){
+                                              return SizedBox(
+                                                child: AlertDialog(
+                                                  title: Text("Error Message"),
+                                                  content: Text(result.body),
+                                                  actions:[
+                                                    FlatButton(
+                                                      child: Text("Retry",
+                                                        style: TextStyle(
+                                                            fontSize: 20.0,
+                                                            color: Colors.redAccent
+                                                        ),
+                                                      ),
+                                                      onPressed: (){
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                    )
+                                                  ],
+                                                ),
+                                              );
+                                            }
+                                        );
+                                      }
+                                  }
                               },
-                              child: new Text("SIGN UP",
+                              child: new Text("SIGN IN",
                                 style: TextStyle(
                                     fontFamily: 'Nunito-Bold',
                                     fontSize: 20.0

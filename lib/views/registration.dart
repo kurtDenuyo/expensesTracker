@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:expensestracker/Data/data_provider.dart';
+import 'package:expensestracker/models/successUsers.dart';
 import 'package:expensestracker/models/users.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+
+import 'dashboard.dart';
 
 class Registration extends StatefulWidget {
   Registration({Key key}) : super(key: key);
@@ -21,13 +26,23 @@ class _RegistrationState extends State<Registration>{
   bool _isLoading = false;
   String errorMessage;
 
+  FocusNode _focusNode;
   @override
   void initState() {
     super.initState();
-
+    _focusNode = FocusNode();
 
   }
-
+@override
+void dispose(){
+    _focusNode.dispose();
+    super.dispose();
+}
+  void _requestFocus(){
+    setState(() {
+      FocusScope.of(context).requestFocus(_focusNode);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,19 +87,20 @@ class _RegistrationState extends State<Registration>{
                           ),
                         ),
                         SizedBox(
-                          height: 30.0,
+                          height: 50.0,
                         ),
                         SizedBox(
-                            height: 300.0,
+                            height: 400.0,
                             width: 300.0,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text("Name",
-                                  style: TextStyle(
-                                      fontFamily: 'Nunito-Regular'
-                                  ),),
                                 TextFormField(
+                                  focusNode: _focusNode,
+                                  onTap: _requestFocus,
+                                  decoration: InputDecoration(
+                                    labelText: "Name",
+                                  ),
                                   controller: _nameController,
                                   obscureText: false,
                                   validator: (value){
@@ -97,11 +113,10 @@ class _RegistrationState extends State<Registration>{
                                       fontFamily: 'Nunito-Regular'
                                   ),
                                 ),
-                                Text("Email",
-                                  style: TextStyle(
-                                      fontFamily: 'Nunito-Regular'
-                                  ),),
                                 TextFormField(
+                                  decoration: InputDecoration(
+                                    labelText: "Email",
+                                  ),
                                   controller: _emailController,
                                   obscureText: false,
                                   validator: (value){
@@ -114,11 +129,10 @@ class _RegistrationState extends State<Registration>{
                                       fontFamily: 'Nunito-Regular'
                                   ),
                                 ),
-                                Text("Password",
-                                  style: TextStyle(
-                                      fontFamily: 'Nunito-Regular'
-                                  ),),
                                 TextFormField(
+                                  decoration: InputDecoration(
+                                    labelText: "Password",
+                                  ),
                                   controller: _passwordController,
                                   obscureText: true,
                                   validator: (value){
@@ -131,11 +145,10 @@ class _RegistrationState extends State<Registration>{
                                       fontFamily: 'Nunito-Regular'
                                   ),
                                 ),
-                                Text("Confirm password",
-                                  style: TextStyle(
-                                      fontFamily: 'Nunito-Regular'
-                                  ),),
                                 TextFormField(
+                                  decoration: InputDecoration(
+                                    labelText: "Confirm password",
+                                  ),
                                   controller: _confirmPasswordController,
                                   obscureText: true,
                                   validator: (value){
@@ -159,32 +172,82 @@ class _RegistrationState extends State<Registration>{
                             color: Colors.white70,
                             textColor: Colors.black,
                             onPressed: () async{
-                              final user = User(
-                                username: _nameController.text,
-                                email: _emailController.text,
-                                password: _passwordController.text
-                              );
-                              final result = await dataProvider().addUser(user);
-                              print(result.error);
-                              print(result.errorMessage);
-                              if(result.error)
+                              if (_formKey.currentState.validate()) {
+                                if(_passwordController.text.compareTo(_confirmPasswordController.text)==0)
+                                {
+                                  final user = User(
+                                      name: _nameController.text,
+                                      email: _emailController.text,
+                                      password: _passwordController.text
+                                  );
+                                  final result = await dataProvider().addUser(user);
+                                 print(result.body);
+                                  print(result.statusCode);
+                                  final logged_users = loginUsers().fromJson(json.decode((result.body)));
+                                  print(logged_users.token);
+                                  if(result.statusCode==200)
+                                    {
+                                      //on success navigate to dashboard
+                                      print("Register success");
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),
+                                      );
+                                    }
+                                  else
+                                    {
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context){
+                                            return SizedBox(
+                                              child: AlertDialog(
+                                                title: Text("Error Message"),
+                                                content: Text(result.body),
+                                                actions:[
+                                                  FlatButton(
+                                                    child: Text("Retry",
+                                                      style: TextStyle(
+                                                          fontSize: 20.0,
+                                                          color: Colors.redAccent
+                                                      ),
+                                                    ),
+                                                    onPressed: (){
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                  )
+                                                ],
+                                              ),
+                                            );
+                                          }
+                                      );
+                                    }
+                                }
+                                else
                                 {
                                   showDialog(
                                       context: context,
-                                      builder: (_) => AlertDialog(
-                                        title: Text('Result'),
-                                        content: Text(result.errorMessage),
-                                        actions: <Widget>[
-                                          FlatButton(
-                                            child: Text('ok'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          )
-                                        ],
-                                      )
+                                      builder: (BuildContext context){
+                                        return SizedBox(
+                                          child: AlertDialog(
+                                            title: Text("Error Message"),
+                                            content: Text("Password not match"),
+                                            actions:[
+                                              FlatButton(
+                                                child: Text("Retry",
+                                                  style: TextStyle(
+                                                      fontSize: 20.0,
+                                                      color: Colors.redAccent
+                                                  ),
+                                                ),
+                                                onPressed: (){
+                                                  Navigator.of(context).pop();
+                                                },
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      }
                                   );
                                 }
+                              }
                             },
                             child: new Text("SIGN UP",
                               style: TextStyle(

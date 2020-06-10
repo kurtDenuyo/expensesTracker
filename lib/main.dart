@@ -4,7 +4,6 @@ void main() => runApp(MyApp());
 
 /// This Widget is the main application widget.
 class MyApp extends StatelessWidget {
-  static const String _title = 'Family Hierarchy';
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +31,7 @@ class MyApp extends StatelessWidget {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: MaterialApp(
+
         home: new Scaffold(
           body: onBoarding(),
         ),
@@ -40,5 +40,3 @@ class MyApp extends StatelessWidget {
   }
 
 }
-
-
