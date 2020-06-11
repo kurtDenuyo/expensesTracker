@@ -26,23 +26,6 @@ class _RegistrationState extends State<Registration>{
   bool _isLoading = false;
   String errorMessage;
 
-  FocusNode _focusNode;
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-
-  }
-@override
-void dispose(){
-    _focusNode.dispose();
-    super.dispose();
-}
-  void _requestFocus(){
-    setState(() {
-      FocusScope.of(context).requestFocus(_focusNode);
-    });
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,10 +79,13 @@ void dispose(){
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 TextFormField(
-                                  focusNode: _focusNode,
-                                  onTap: _requestFocus,
+                                  cursorColor: Colors.green,
                                   decoration: InputDecoration(
-                                    labelText: "Name",
+                                      focusedBorder:OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Colors.green, width: 2.0),
+                                      ),
+                                      labelText: "Name",
+                                    focusColor: Colors.green,
                                   ),
                                   controller: _nameController,
                                   obscureText: false,
@@ -114,7 +100,11 @@ void dispose(){
                                   ),
                                 ),
                                 TextFormField(
+                                  cursorColor: Colors.green,
                                   decoration: InputDecoration(
+                                    focusedBorder:OutlineInputBorder(
+                                      borderSide: const BorderSide(color: Colors.green, width: 2.0),
+                                    ),
                                     labelText: "Email",
                                   ),
                                   controller: _emailController,
@@ -130,7 +120,11 @@ void dispose(){
                                   ),
                                 ),
                                 TextFormField(
+                                  cursorColor: Colors.green,
                                   decoration: InputDecoration(
+                                    focusedBorder:OutlineInputBorder(
+                                      borderSide: const BorderSide(color: Colors.green, width: 2.0),
+                                    ),
                                     labelText: "Password",
                                   ),
                                   controller: _passwordController,
@@ -146,7 +140,11 @@ void dispose(){
                                   ),
                                 ),
                                 TextFormField(
+                                  cursorColor: Colors.green,
                                   decoration: InputDecoration(
+                                    focusedBorder:OutlineInputBorder(
+                                      borderSide: const BorderSide(color: Colors.green, width: 2.0),
+                                    ),
                                     labelText: "Confirm password",
                                   ),
                                   controller: _confirmPasswordController,
@@ -185,6 +183,7 @@ void dispose(){
                                   print(result.statusCode);
                                   final logged_users = loginUsers().fromJson(json.decode((result.body)));
                                   print(logged_users.token);
+                                 // print(logged_users);
                                   if(result.statusCode==200)
                                     {
                                       //on success navigate to dashboard

@@ -82,7 +82,11 @@ class _LoginPageState extends State<LoginPage>{
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   TextFormField(
+                                    cursorColor: Colors.green,
                                     decoration: InputDecoration(
+                                      focusedBorder:OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Colors.green, width: 2.0),
+                                      ),
                                       labelText: "Email",
                                     ),
                                     controller: _emailController,
@@ -98,7 +102,11 @@ class _LoginPageState extends State<LoginPage>{
                                     ),
                                   ),
                                   TextFormField(
+                                    cursorColor: Colors.green,
                                     decoration: InputDecoration(
+                                      focusedBorder:OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Colors.green, width: 2.0),
+                                      ),
                                       labelText: "Password",
                                     ),
                                     controller: _passwordController,

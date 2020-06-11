@@ -39,7 +39,7 @@ class HomeState extends State<Home> {
   }
   @override
   Widget build(BuildContext context) {
-      final category = dataProvider().getCategory();
+
       return WillPopScope(
         onWillPop: _onBackPressed,
         child: Scaffold(

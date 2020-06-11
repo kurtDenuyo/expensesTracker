@@ -31,7 +31,9 @@ class MyApp extends StatelessWidget {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: MaterialApp(
-
+        theme: ThemeData(
+          primarySwatch: Colors.green,
+        ),
         home: new Scaffold(
           body: onBoarding(),
         ),
