@@ -16,5 +16,5 @@ class User {
     @required this.password
   }
   );
-  Map<String, dynamic> toJson() => _$userToJson(this);
+  Map<String, dynamic> toJson() => _$UserToJson(this);
 }

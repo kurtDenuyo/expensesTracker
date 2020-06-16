@@ -188,7 +188,7 @@ class _RegistrationState extends State<Registration>{
                                     {
                                       //on success navigate to dashboard
                                       print("Register success");
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Home(logged_users)),
                                       );
                                     }
                                   else

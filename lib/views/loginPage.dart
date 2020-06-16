@@ -1,5 +1,7 @@
 
 
+import 'dart:convert';
+
 import 'package:expensestracker/Data/data_provider.dart';
 import 'package:expensestracker/models/successUsers.dart';
 import 'package:flutter/cupertino.dart';
@@ -137,12 +139,12 @@ class _LoginPageState extends State<LoginPage>{
                                     final result = await dataProvider().loginUser(_emailController.text, _passwordController.text);
                                     print(result.body);
                                     print(result.statusCode);
+                                    final logged_users = loginUsers().fromJson(json.decode((result.body)));
                                     if(result.statusCode==200)
                                       {
                                         //on success navigate to dashboard
                                         print("Login success");
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),
-                                        );
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(logged_users)),);
                                       }
                                     else
                                       {

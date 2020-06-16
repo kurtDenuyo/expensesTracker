@@ -1,4 +1,7 @@
 
+import 'package:expensestracker/Data/data_provider.dart';
+import 'package:expensestracker/models/Records.dart';
+import 'package:expensestracker/models/successUsers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -7,26 +10,32 @@ import '../main.dart';
 import 'category.dart';
 
 class createRecord extends StatefulWidget {
- // createRecord({Key key}) : super(key: key);
+  final loginUsers currentUsers;
+  const createRecord(this.currentUsers);
   @override
   State<StatefulWidget> createState() => _createRecordState();
 }
 
 class _createRecordState extends State<createRecord> with SingleTickerProviderStateMixin{
   TabController _controller;
+  final TextEditingController _categoryController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
+  final  _recordTypeController = 0;
+  int categoryId;
   @override
   void initState() {
     super.initState();
+    _categoryController.text = "Food & Drinks";
     _controller = new TabController(length: 2, vsync: this);
   }
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-    final TextEditingController _notesController = TextEditingController();
-    final TextEditingController _amountController = TextEditingController();
-    final TextEditingController _dateController = TextEditingController();
-    final TextEditingController _timeController = TextEditingController();
-    final TextEditingController _categoryController = TextEditingController();
+
+
     String month = "";
     switch(DateTime.now().month.toInt()) {
       case 1: {
@@ -94,7 +103,7 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
     }
     _dateController.text = month+"-"+DateTime.now().day.toString()+"-"+DateTime.now().year.toString();
     _timeController.text = DateTime.now().hour.toString()+":"+DateTime.now().minute.toString();
-    _categoryController.text = "Food & Drinks";
+
     return new Scaffold(
       appBar: new AppBar(
         centerTitle: true,
@@ -105,6 +114,7 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
             icon: Icon(Icons.check),
             onPressed: ()
             {
+              _addRecord();
             },
           ),
         ],
@@ -128,7 +138,8 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
                     children: <Widget>[
                       new Container(
                         decoration: new BoxDecoration(color: Colors.white70,
-                          border: Border.all(color: Colors.black12, width: 1),),
+                          border: Border.all(color: Colors.black12, width: 1),
+                        ),
                           child: new TabBar(
                           labelStyle: TextStyle(fontFamily: 'Nunito-Regular',color: Colors.green),  //For Selected tab
                           unselectedLabelStyle: TextStyle(fontFamily: 'Nunito-Regular',color: Colors.black), //For Un-selected Tabs
@@ -184,7 +195,7 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
                                         obscureText: false,
                                         validator: (value){
                                           if(value.isEmpty){
-                                            return 'Please enter a name';
+                                            return 'Please enter note';
                                           }
                                           return null;
                                         },
@@ -207,7 +218,7 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
                                         obscureText: false,
                                         validator: (value){
                                           if(value.isEmpty){
-                                            return 'Please enter an email';
+                                            return 'Please enter amount';
                                           }
                                           return null;
                                         },
@@ -348,9 +359,15 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
                                                 ),
                                                 labelText: "  Category"
                                             ),
-                                            onTap: (){
-                                              Navigator.push(context, MaterialPageRoute(builder: (context) => category()),
+                                            onTap: () async{
+
+                                              List result = await Navigator.push(context, MaterialPageRoute(builder: (context) => category()),
                                               );
+                                              setState(() {
+                                                _categoryController.text = result[0].toString();
+                                                categoryId = result[1];
+                                                print(result[1]);
+                                              });
                                             },
                                           )
                                       )
@@ -377,7 +394,7 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
                                         obscureText: false,
                                         validator: (value){
                                           if(value.isEmpty){
-                                            return 'Please enter a name';
+                                            return 'Please enter note';
                                           }
                                           return null;
                                         },
@@ -400,7 +417,7 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
                                         obscureText: false,
                                         validator: (value){
                                           if(value.isEmpty){
-                                            return 'Please enter an email';
+                                            return 'Please enter amount';
                                           }
                                           return null;
                                         },
@@ -541,8 +558,10 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
                                                 ),
                                                 labelText: "  Category"
                                             ),
-                                            onTap: (){
-
+                                            onTap: () async{
+                                              List result = await Navigator.push(context, MaterialPageRoute(builder:(context)=>category()));
+                                              _categoryController.text = result[0].toString();
+                                              categoryId = result[1];
                                             },
                                           )
                                       )
@@ -563,6 +582,87 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
         ),
       ),
     );
+
+  }
+
+  void _addRecord() async{
+    if (_formKey.currentState.validate()) {
+      if(categoryId==null)
+      {
+        print("Category id: "+ categoryId.toString());
+        showDialog(
+            context: context,
+            builder: (BuildContext context){
+              return SizedBox(
+                child: AlertDialog(
+                  title: Text("Error Message"),
+                  content: Text("No Category Selected"),
+                  actions:[
+                    FlatButton(
+                      child: Text("Select",
+                        style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.redAccent
+                        ),
+                      ),
+                      onPressed: (){
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                ),
+              );
+            }
+        );
+      }
+      else
+        {
+          final record = {
+            "record": {
+              "amount": _amountController.text,
+              "notes": _notesController.text,
+              "record_type": _controller.index,
+              "date": _dateController.text,
+              "category_id": categoryId,
+            }
+          };
+          dataProvider().token(widget.currentUsers.token);
+          final response = await dataProvider().addRecord(record, widget.currentUsers);
+          //print(widget.currentUsers.token);
+          print("response  "+response.statusCode.toString());
+          if(response.statusCode==200)
+          {
+            Navigator.of(context).pop();
+          }
+          else
+          {
+            showDialog(
+                context: context,
+                builder: (BuildContext context){
+                  return SizedBox(
+                    child: AlertDialog(
+                      title: Text("Error Message"),
+                      content: Text(response.body),
+                      actions:[
+                        FlatButton(
+                          child: Text("Retry",
+                            style: TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.redAccent
+                            ),
+                          ),
+                          onPressed: (){
+                            Navigator.of(context).pop();
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                }
+            );
+          }
+        }
+    }
 
   }
 }

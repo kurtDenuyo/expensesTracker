@@ -1,10 +1,9 @@
 
 import 'dart:convert';
-
+import 'package:expensestracker/Data/data_provider.dart';
+import 'package:expensestracker/models/categoryModel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:expensestracker/Data/data_provider.dart';
-import 'package:expensestracker/models/category.dart';
 import 'package:flutter/material.dart';
 class category extends StatefulWidget {
   @override
@@ -42,18 +41,11 @@ class createBody extends StatefulWidget {
 }
 class _createBodyState extends State<createBody> {
   static const API = 'http://expenses.koda.ws/';
-  Future<Categories> loadCategory() async{
-    final result = await http.get(
-      API + 'api/v1/categories',
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-    //print(result.body);
-    print(Categories.fromJson(jsonDecode(result.body)).name);
-    return Categories.fromJson(jsonDecode(result.body));
-
+  Future<CategoryModel> loadCategory() async{
+    final categoryResponse = await dataProvider().fetchCategory();
+    return categoryResponse;
 }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -61,10 +53,34 @@ class _createBodyState extends State<createBody> {
       children: <Widget>[
         FutureBuilder(
           future: loadCategory(),
-          builder: (context,AsyncSnapshot<Categories> result){
-            if(result.hasData)
+          builder: (context,AsyncSnapshot<CategoryModel> snapshot){
+            if(snapshot.connectionState == ConnectionState.done)
               {
-                return Text(result.toString());
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: snapshot.data.categories.length,
+                  itemBuilder: (BuildContext context, int index){
+                    return Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black12, width: 1)
+                      ),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.all(8.0),
+                        title: Text(snapshot.data.categories[index].name),
+                        leading: SizedBox(
+                          width: 100,
+                          child: Image.network(API+
+                              snapshot.data.categories[index].icon,
+                              fit: BoxFit.fill),
+                        ),
+                        onTap: () {
+                          //print([snapshot.data.categories[index].name, snapshot.data.categories[index].id]);
+                          Navigator.pop(context, [snapshot.data.categories[index].name, snapshot.data.categories[index].id]);
+                        },
+                      ),
+                    );
+                  },
+                );
               }
             return CircularProgressIndicator();
           },

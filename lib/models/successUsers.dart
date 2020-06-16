@@ -9,6 +9,7 @@ class loginUsers {
   String message;
   String id;
   String token;
+
   loginUsers({this.name, this.email, this.message, this.id, this.token});
 
   loginUsers fromJson(Map<String, dynamic> json) {
