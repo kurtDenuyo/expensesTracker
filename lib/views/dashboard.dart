@@ -8,17 +8,20 @@ import 'package:expensestracker/models/Records.dart';
 import 'package:expensestracker/models/categoryModel.dart';
 import 'package:expensestracker/models/chart.dart';
 import 'package:expensestracker/models/recentFiveRecords.dart';
-import 'package:expensestracker/models/successUsers.dart';
+import 'package:expensestracker/models/usersModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../main.dart';
+import 'allRecordsView.dart';
 import 'createRecord.dart';
+import 'editRecord.dart';
 
 class Home extends StatefulWidget {
-  final loginUsers currentUsers;
+  final UserModel currentUsers;
   const Home(this.currentUsers);
 
   @override
@@ -52,18 +55,21 @@ class HomeState extends State<Home> {
   RecordsModel recordData;
   RecentFiveRecords fiveRecords;
   CategoryModel categoryModel;
-  Timer timer;
   bool _hasData;
-  double totalIncome, totalExpense;
+  double totalIncome, totalExpenses;
   static const API = 'http://expenses.koda.ws/';
   Future<RecordsModel> loadRecords() async{
     final recordResponse = await dataProvider().fetchRecords(widget.currentUsers);
     final fiveRecordResponse = await dataProvider().fetchFiveRecords(widget.currentUsers);
     final categoryResponse = await dataProvider().fetchCategory();
+    final overviewResponse = await dataProvider().fetchOverview(widget.currentUsers);
     //print("Result ");
-    print("response "+fiveRecordResponse.records[1].amount.toString());
+    //print("Total content "+recordResponse.records.length.toString());
+   // print("response "+fiveRecordResponse.records[1].amount.toString());
+    print("Total expenses"+overviewResponse.expenses.toString());
+    print("Total income"+overviewResponse.income.toString());
     setState(() {
-      if(recordResponse==null) {
+      if(recordResponse.records.length == 0) {
         _hasData = false;
         print("No record found");
       }
@@ -71,43 +77,32 @@ class HomeState extends State<Home> {
         recordData = recordResponse;
         fiveRecords = fiveRecordResponse;
         categoryModel = categoryResponse;
+        totalIncome = overviewResponse.income;
+        totalExpenses = overviewResponse.expenses;
         _hasData = true;
-        totalExpense = 0;
-        totalIncome = 0;
-        for(int ctr = 0; ctr<recordData.records.length;ctr++)
-        {
-          if(recordData.records[ctr].recordType==0)
-          {
-            totalIncome+=recordData.records[ctr].amount;
-          }
-          else if(recordData.records[ctr].recordType==1)
-          {
-            totalExpense+=recordData.records[ctr].amount;
-          }
-        }
-        print(totalIncome.toString()+" "+totalExpense.toString());
-
         print("Record succssfully fetch");
       }
     });
     return recordResponse;
   }
+  void _refreshHome() async{
+    loadRecords();
+  }
   @override
   void initState() {
     super.initState();
-    timer = new Timer.periodic(new Duration(seconds: 2), (t) => loadRecords());
-    //timer = new Timer.periodic(new Duration(seconds: 2), (t) => fetchFiveRecords());
-
+    print("Load records");
+    loadRecords();
   }
 
   @override
   void dispose() {
-    timer.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    //loadRecords();
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
@@ -116,7 +111,11 @@ class HomeState extends State<Home> {
           backgroundColor: Colors.teal,
           title: Text("Home",),
         ),
-        body: (_hasData==null)?CircularProgressIndicator():(_hasData)?
+        body: (_hasData==null)?
+        Center(
+          child: SpinKitWave(color: Colors.blueGrey, type: SpinKitWaveType.center),
+        )
+            :(_hasData)?
             Center(
                 child: Padding(
                  padding:EdgeInsets.all(20.0),
@@ -174,21 +173,94 @@ class HomeState extends State<Home> {
                           itemCount: fiveRecords.records.length,
                           itemBuilder: (BuildContext contex, int index)
                           {
+                            String month = "";
+                            switch(fiveRecords.records[fiveRecords.records.length-(index+1)].date.month) {
+                              case 1: {
+                                month = "Jan";
+                                print(month);
+                              }
+                              break;
+
+                              case 2: {
+                                month = "Feb";
+                                print(month);
+                              }
+                              break;
+                              case 3: {
+                                month = "Mar";
+                                print(month);
+                              }
+                              break;
+                              case 4: {
+                                month = "Apr";
+                                print(month);
+                              }
+                              break;
+                              case 5: {
+                                month = "May";
+                                print(month);
+                              }
+                              break;
+                              case 6: {
+                                month = "Jun";
+                                print(month);
+                              }
+                              break;
+                              case 7: {
+                                month = "July";
+                                print(month);
+                              }
+                              break;
+                              case 8: {
+                                month = "Aug";
+                                print(month);
+                              }
+                              break;
+                              case 9: {
+                                month = "Sep";
+                                print(month);
+                              }
+                              break;
+                              case 10: {
+                                month = "Oct";
+                                print(month);
+                              }
+                              break;
+                              case 11: {
+                                month = "Nov";
+                                print(month);
+                              }
+                              break;
+
+                              default: {
+                                month = "Dec";
+                                print(month);
+                              }
+                              break;
+                            }
+                            print("index counter "+(fiveRecords.records.length-(index+1)).toString()+index.toString());
                             return ListTile(
                                //contentPadding: EdgeInsets.all(0.0),
-                              title: Text("₱ "+fiveRecords.records[index].amount.toString(),
+                              title: Text("₱ "+fiveRecords.records[fiveRecords.records.length-(index+1)].amount.toString(),
                                 style: TextStyle(
                                   fontSize: 10.0,
                                   color: Colors.green,
                                 ),),
-                              subtitle: Text(fiveRecords.records[index].category.name.toString()+"  ---"+ fiveRecords.records[index].notes.toString(),
+                              subtitle: Text(fiveRecords.records[fiveRecords.records.length-(index+1)].category.name.toString()+"  ---"+ fiveRecords.records[fiveRecords.records.length-(index+1)].notes.toString(),
                                 style: TextStyle(
                                   fontSize: 10.0
                                 ),),
                               leading: Image.network(API+
-                                  categoryModel.categories[fiveRecords.records[index].category.id-1].icon,
+                                  categoryModel.categories[fiveRecords.records[fiveRecords.records.length-(index+1)].category.id-1].icon,
                                   fit: BoxFit.fill),
-                              trailing: Text("date here"),
+                              trailing: Text(month+" "+fiveRecords.records[fiveRecords.records.length-(index+1)].date.day.toString()+" , "+fiveRecords.records[fiveRecords.records.length-(index+1)].date.year.toString(),
+                                style: TextStyle(
+                                  fontSize: 10.0,
+                                ),),
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, recordData, recordData.records.length-(index+1))))
+                                    .then((value) => value?_refreshHome():null);
+                              },
                             );
                           },
                         )
@@ -203,6 +275,8 @@ class HomeState extends State<Home> {
                     child: Center(
                       child: new InkWell(
                         onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => allRecords(widget.currentUsers)),)
+                              .then((value) => value?_refreshHome():null);
                         },
                         child: new Text('View More',
                             style: TextStyle(
@@ -258,7 +332,8 @@ class HomeState extends State<Home> {
                     onPressed: (){
 
                       //loadRecords();
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => createRecord(widget.currentUsers)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => createRecord(widget.currentUsers)),)
+                          .then((value) => value?_refreshHome():null);
                     },
                     child: new Text("START TRACKING",
                       style: TextStyle(
@@ -272,13 +347,80 @@ class HomeState extends State<Home> {
             ),
           ),
         ),
-        drawer: createDrawer(),
+        drawer: Drawer(
+            child: Container(
+              color: Colors.teal,
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  SizedBox(
+                    height: 150.0,
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: <Widget>[
+                        Icon(Icons.home),
+                        Padding(
+                          padding:EdgeInsets.only(left:10.0),
+                          child: Text('HOME',
+                            style: TextStyle(
+                                fontFamily: 'Nunito-Regular'
+                            ),),
+                        )
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.pop(context,true);
+                    },
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: <Widget>[
+                        Icon(Icons.category),
+                        Padding(
+                          padding:EdgeInsets.only(left:8.0),
+                          child: Text('RECORDS',
+                            style: TextStyle(
+                                fontFamily: 'Nunito-Regular'
+                            ),),
+                        )
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => allRecords(widget.currentUsers)),)
+                          .then((value) => value?_refreshHome():null);
+                    },
+                  ),
+
+                  ListTile(
+                    title: Row(
+                      children: <Widget>[
+                        Icon(Icons.settings_power),
+                        Padding(
+                          padding:EdgeInsets.only(left:8.0),
+                          child: Text('LOGOUT',
+                            style: TextStyle(
+                                fontFamily: 'Nunito-Regular'
+                            ),),
+                        )
+                      ],
+                    ),
+                    onTap: () {
+                      dispose();
+                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
+                          MyApp()), (Route<dynamic> route) => false);
+                    },
+                  ),
+                ],
+              ),
+            )
+        ),
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.teal,
           onPressed: (){
             print(widget.currentUsers.token);
-            Navigator.push(context, MaterialPageRoute(builder: (context) => createRecord(widget.currentUsers)),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (context) => createRecord(widget.currentUsers)),)
+            .then((value) => value?_refreshHome():null);
           },
           child: Icon(Icons.add),
         ), //
@@ -296,7 +438,7 @@ class HomeState extends State<Home> {
       measureFn: (chartModel wear,_) => wear.total,
       data: [
         chartModel('Income', totalIncome),
-        chartModel('Expense', totalExpense),
+        chartModel('Expense', totalExpenses),
       ],
       colorFn: (chartModel wear,_){
         switch (wear.recordType){
@@ -327,89 +469,6 @@ class HomeState extends State<Home> {
       seriesList,
       vertical: false,
       barGroupingType: charts.BarGroupingType.grouped,
-    );
-  }
-}
-class createDrawer extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => createDrawerState();
-}
-
-class createDrawerState extends State<createDrawer> {
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-        child: Container(
-          color: Colors.teal,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              SizedBox(
-                height: 150.0,
-              ),
-              ListTile(
-                title: Row(
-                  children: <Widget>[
-                    Icon(Icons.home),
-                    Padding(
-                      padding:EdgeInsets.only(left:10.0),
-                      child: Text('HOME',
-                        style: TextStyle(
-                            fontFamily: 'Nunito-Regular'
-                        ),),
-                    )
-                  ],
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Row(
-                  children: <Widget>[
-                    Icon(Icons.category),
-                    Padding(
-                      padding:EdgeInsets.only(left:8.0),
-                      child: Text('RECORDS',
-                        style: TextStyle(
-                            fontFamily: 'Nunito-Regular'
-                        ),),
-                    )
-                  ],
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-
-              ListTile(
-                title: Row(
-                  children: <Widget>[
-                    Icon(Icons.settings_power),
-                    Padding(
-                      padding:EdgeInsets.only(left:8.0),
-                      child: Text('LOGOUT',
-                        style: TextStyle(
-                            fontFamily: 'Nunito-Regular'
-                        ),),
-                    )
-                  ],
-                ),
-                onTap: () {
-                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
-                      MyApp()), (Route<dynamic> route) => false);
-                },
-              ),
-            ],
-          ),
-        )
     );
   }
 }

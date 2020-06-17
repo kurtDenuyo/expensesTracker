@@ -80,7 +80,7 @@ class Record {
 
   int id;
   DateTime date;
-  Notes notes;
+  String notes;
   Category category;
   double amount;
   int recordType;
@@ -88,7 +88,7 @@ class Record {
   factory Record.fromJson(Map<String, dynamic> json) => Record(
     id: json["id"],
     date: json["date"] == null ? null : DateTime.parse(json["date"]),
-    notes: notesValues.map[json["notes"]],
+    notes: json["notes"],
     category: Category.fromJson(json["category"]),
     amount: json["amount"],
     recordType: json["record_type"],
@@ -97,7 +97,7 @@ class Record {
   Map<String, dynamic> toJson() => {
     "id": id,
     "date": date == null ? null : date.toIso8601String(),
-    "notes": notesValues.reverse[notes],
+    "notes": notes,
     "category": category.toJson(),
     "amount": amount,
     "record_type": recordType,
@@ -111,45 +111,15 @@ class Category {
   });
 
   int id;
-  Name name;
+  String name;
 
   factory Category.fromJson(Map<String, dynamic> json) => Category(
     id: json["id"],
-    name: nameValues.map[json["name"]],
+    name: json["name"],
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "name": nameValues.reverse[name],
+    "name": name,
   };
-}
-
-enum Name { ENTERTAINMENT, HEALTHCARE, FOOD_DRINKS }
-
-final nameValues = EnumValues({
-  "Entertainment": Name.ENTERTAINMENT,
-  "Food & Drinks": Name.FOOD_DRINKS,
-  "Healthcare": Name.HEALTHCARE
-});
-
-enum Notes { NEW_EXPENSE, NEW, ASDASD }
-
-final notesValues = EnumValues({
-  "asdasd": Notes.ASDASD,
-  "new": Notes.NEW,
-  "New expense": Notes.NEW_EXPENSE
-});
-
-class EnumValues<T> {
-  Map<String, T> map;
-  Map<T, String> reverseMap;
-
-  EnumValues(this.map);
-
-  Map<T, String> get reverse {
-    if (reverseMap == null) {
-      reverseMap = map.map((k, v) => new MapEntry(v, k));
-    }
-    return reverseMap;
-  }
 }

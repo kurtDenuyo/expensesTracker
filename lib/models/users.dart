@@ -5,11 +5,11 @@ part 'users.g.dart';
 
 @JsonSerializable()
 
-class User {
+class RegisterUser {
   String name;
   String email;
   String password;
-  User(
+  RegisterUser(
   {
     @required this.name,
     @required this.email,

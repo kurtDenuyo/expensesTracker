@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:expensestracker/Data/data_provider.dart';
-import 'package:expensestracker/models/successUsers.dart';
 import 'package:expensestracker/models/users.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -173,22 +172,19 @@ class _RegistrationState extends State<Registration>{
                               if (_formKey.currentState.validate()) {
                                 if(_passwordController.text.compareTo(_confirmPasswordController.text)==0)
                                 {
-                                  final user = User(
+                                  final user = RegisterUser(
                                       name: _nameController.text,
                                       email: _emailController.text,
                                       password: _passwordController.text
                                   );
                                   final result = await dataProvider().addUser(user);
-                                 print(result.body);
-                                  print(result.statusCode);
-                                  final logged_users = loginUsers().fromJson(json.decode((result.body)));
-                                  print(logged_users.token);
+
                                  // print(logged_users);
-                                  if(result.statusCode==200)
+                                  if(result.token!=null)
                                     {
                                       //on success navigate to dashboard
-                                      print("Register success");
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Home(logged_users)),
+                                      print("Register user success with response token "+result.token);
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Home(result)),
                                       );
                                     }
                                   else
@@ -199,7 +195,7 @@ class _RegistrationState extends State<Registration>{
                                             return SizedBox(
                                               child: AlertDialog(
                                                 title: Text("Error Message"),
-                                                content: Text(result.body),
+                                                content: Text(result.message),
                                                 actions:[
                                                   FlatButton(
                                                     child: Text("Retry",

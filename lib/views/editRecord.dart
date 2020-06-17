@@ -9,14 +9,16 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import '../main.dart';
 import 'category.dart';
 
-class createRecord extends StatefulWidget {
+class editRecord extends StatefulWidget {
   final UserModel currentUsers;
-  const createRecord(this.currentUsers);
+  final RecordsModel record;
+  final int index;
+  const editRecord(this.currentUsers, this.record, this.index);
   @override
-  State<StatefulWidget> createState() => _createRecordState();
+  State<StatefulWidget> createState() => _editRecordState();
 }
 
-class _createRecordState extends State<createRecord> with SingleTickerProviderStateMixin{
+class _editRecordState extends State<editRecord> with SingleTickerProviderStateMixin{
   TabController _controller;
   final TextEditingController _categoryController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -29,7 +31,12 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    _categoryController.text = "Food & Drinks";
+    _categoryController.text = widget.record.records[widget.index].category.name;
+    _notesController.text = widget.record.records[widget.index].notes;
+    _amountController.text = widget.record.records[widget.index].amount.toString();
+    categoryId = widget.record.records[widget.index].category.id;
+    //_dateController.text = widget.record.records[widget.index].amount.toString();
+    //_timeController.text = widget.record.records[widget.index].amount.toString();
     _controller = new TabController(length: 2, vsync: this);
   }
   @override
@@ -101,29 +108,32 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
       }
       break;
     }
-    _dateController.text = month+"-"+DateTime.now().day.toString()+"-"+DateTime.now().year.toString();
+    _dateController.text = month+"-"+widget.record.records[widget.index].date.day.toString()+"-"+widget.record.records[widget.index].date.year.toString();
     _timeController.text = DateTime.now().hour.toString()+":"+DateTime.now().minute.toString();
 
     return new Scaffold(
       appBar: new AppBar(
         centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.pop(context,true),
-        ),
         backgroundColor: Colors.teal,
-        title: Text("Add Record",),
+        title: Text("Edit Record",),
         actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: ()
+            {
+              _deleteRecord();
+            },
+          ),
           IconButton(
             icon: Icon(Icons.check),
             onPressed: ()
             {
-              _addRecord();
+              _editRecord();
             },
           ),
         ],
       ),
-      body: new Form(
+      body: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +154,7 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
                         decoration: new BoxDecoration(color: Colors.white70,
                           border: Border.all(color: Colors.black12, width: 1),
                         ),
-                          child: new TabBar(
+                        child: new TabBar(
                           labelStyle: TextStyle(fontFamily: 'Nunito-Regular',color: Colors.green),  //For Selected tab
                           unselectedLabelStyle: TextStyle(fontFamily: 'Nunito-Regular',color: Colors.black), //For Un-selected Tabs
                           unselectedLabelColor: Colors.black,
@@ -589,7 +599,7 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
 
   }
 
-  void _addRecord() async{
+  void _editRecord() async{
     if (_formKey.currentState.validate()) {
       if(categoryId==null)
       {
@@ -620,53 +630,91 @@ class _createRecordState extends State<createRecord> with SingleTickerProviderSt
         );
       }
       else
+      {
+        final record = {
+          "record": {
+            "amount": _amountController.text,
+            "notes": _notesController.text,
+            "record_type": _controller.index,
+            "date": _dateController.text,
+            "category_id": categoryId,
+          }
+        };
+        dataProvider().token(widget.currentUsers.token);
+        final response = await dataProvider().editRecord(record, widget.currentUsers, widget.record.records[widget.index].id.toString());
+        //print(widget.currentUsers.token);
+
+        if(response.statusCode==200)
         {
-          final record = {
-            "record": {
-              "amount": _amountController.text,
-              "notes": _notesController.text,
-              "record_type": _controller.index,
-              "date": _dateController.text,
-              "category_id": categoryId,
-            }
-          };
-          dataProvider().token(widget.currentUsers.token);
-          final response = await dataProvider().addRecord(record, widget.currentUsers);
-          //print(widget.currentUsers.token);
-          print("response  "+response.statusCode.toString());
-          if(response.statusCode==200)
-          {
-            Navigator.pop(context,true);
-          }
-          else
-          {
-            showDialog(
-                context: context,
-                builder: (BuildContext context){
-                  return SizedBox(
-                    child: AlertDialog(
-                      title: Text("Error Message"),
-                      content: Text(response.body),
-                      actions:[
-                        FlatButton(
-                          child: Text("Retry",
-                            style: TextStyle(
-                                fontSize: 20.0,
-                                color: Colors.redAccent
-                            ),
-                          ),
-                          onPressed: (){
-                            Navigator.of(context).pop();
-                          },
-                        )
-                      ],
-                    ),
-                  );
-                }
-            );
-          }
+          print("Status  Update success");
+          Navigator.pop(context,true);
         }
+        else
+        {
+          showDialog(
+              context: context,
+              builder: (BuildContext context){
+                return SizedBox(
+                  child: AlertDialog(
+                    title: Text("Error Message"),
+                    content: Text(response.body),
+                    actions:[
+                      FlatButton(
+                        child: Text("Retry",
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              color: Colors.redAccent
+                          ),
+                        ),
+                        onPressed: (){
+                          Navigator.pop(context,true);
+                        },
+                      )
+                    ],
+                  ),
+                );
+              }
+          );
+        }
+      }
     }
 
   }
+  void _deleteRecord() async{
+    final response = await dataProvider().deleteRecord(widget.currentUsers, widget.record.records[widget.index].id.toString());
+    print(response.body);
+    if(response.statusCode==200)
+    {
+      print("Status: Delete Success");
+      Navigator.pop(context,true);
+    }
+    else
+    {
+      showDialog(
+          context: context,
+          builder: (BuildContext context){
+            return SizedBox(
+              child: AlertDialog(
+                title: Text("Error Message"),
+                content: Text(response.body),
+                actions:[
+                  FlatButton(
+                    child: Text("Retry",
+                      style: TextStyle(
+                          fontSize: 20.0,
+                          color: Colors.redAccent
+                      ),
+                    ),
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+            );
+          }
+      );
+    }
+  }
 }
+

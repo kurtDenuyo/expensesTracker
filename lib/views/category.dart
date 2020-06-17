@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:expensestracker/Data/data_provider.dart';
 import 'package:expensestracker/models/categoryModel.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 class category extends StatefulWidget {
@@ -57,6 +58,7 @@ class _createBodyState extends State<createBody> {
             if(snapshot.connectionState == ConnectionState.done)
               {
                 return ListView.builder(
+                  scrollDirection: Axis.vertical,
                   shrinkWrap: true,
                   itemCount: snapshot.data.categories.length,
                   itemBuilder: (BuildContext context, int index){
@@ -82,7 +84,9 @@ class _createBodyState extends State<createBody> {
                   },
                 );
               }
-            return CircularProgressIndicator();
+            return Center(
+              child: SpinKitWave(color: Colors.green, type: SpinKitWaveType.start),
+            );
           },
         )
       ],

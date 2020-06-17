@@ -3,7 +3,6 @@
 import 'dart:convert';
 
 import 'package:expensestracker/Data/data_provider.dart';
-import 'package:expensestracker/models/successUsers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -137,14 +136,14 @@ class _LoginPageState extends State<LoginPage>{
                                 if(_formKey.currentState.validate())
                                   {
                                     final result = await dataProvider().loginUser(_emailController.text, _passwordController.text);
-                                    print(result.body);
-                                    print(result.statusCode);
-                                    final logged_users = loginUsers().fromJson(json.decode((result.body)));
-                                    if(result.statusCode==200)
+                                    print(result.token);
+                                   print(result.user.id);
+                                   // final logged_users = loginUsers().fromJson(json.decode((result.body)));
+                                    if(result.token!=null)
                                       {
                                         //on success navigate to dashboard
-                                        print("Login success");
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(logged_users)),);
+                                        print("Login success with username"+result.user.email);
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(result)),);
                                       }
                                     else
                                       {
@@ -154,7 +153,7 @@ class _LoginPageState extends State<LoginPage>{
                                               return SizedBox(
                                                 child: AlertDialog(
                                                   title: Text("Error Message"),
-                                                  content: Text(result.body),
+                                                  content: Text(result.toString()),
                                                   actions:[
                                                     FlatButton(
                                                       child: Text("Retry",
