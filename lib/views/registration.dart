@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:expensestracker/Data/data_provider.dart';
 import 'package:expensestracker/models/users.dart';
+import 'package:expensestracker/models/usersModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -177,11 +178,12 @@ class _RegistrationState extends State<Registration>{
                                       email: _emailController.text,
                                       password: _passwordController.text
                                   );
-                                  final result = await dataProvider().addUser(user);
+                                  final response = await dataProvider().addUser(user);
 
-                                 // print(logged_users);
-                                  if(result.token!=null)
+                                  print(response.statusCode);
+                                  if(response.statusCode==200)
                                     {
+                                      final result = userModelFromJson(response.body);
                                       //on success navigate to dashboard
                                       print("Register user success with response token "+result.token);
                                       Navigator.push(context, MaterialPageRoute(builder: (context) => Home(result)),
@@ -195,7 +197,7 @@ class _RegistrationState extends State<Registration>{
                                             return SizedBox(
                                               child: AlertDialog(
                                                 title: Text("Error Message"),
-                                                content: Text(result.message),
+                                                content: Text(response.body),
                                                 actions:[
                                                   FlatButton(
                                                     child: Text("Retry",

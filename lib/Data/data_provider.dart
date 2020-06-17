@@ -18,18 +18,15 @@ class dataProvider {
     _token = value;
   }
 
-  Future<UserModel> addUser(RegisterUser user) async{
+  Future<http.Response> addUser(RegisterUser user) async{
     final response = await http.post(
         API + 'api/v1/sign_up',
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: json.encode(user.toJson()));
+    return response;
 
-    final result = userModelFromJson(response.body);
-    //print(result.records.length.toString());
-    //print("result from json"+result.records[1].amount.toString());
-    return result;
   }
   Future<UserModel> loginUser(String email, String password) async{
     final response = await http.post(
