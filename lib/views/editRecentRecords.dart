@@ -1,5 +1,7 @@
+
 import 'package:expensestracker/Data/data_provider.dart';
 import 'package:expensestracker/models/Records.dart';
+import 'package:expensestracker/models/recentFiveRecords.dart';
 import 'package:expensestracker/models/usersModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,146 +10,133 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import '../main.dart';
 import 'category.dart';
 
-class createRecord extends StatefulWidget {
+class editRecent extends StatefulWidget {
   final UserModel currentUsers;
-  const createRecord(this.currentUsers);
+  final  RecentFiveRecords record;
+  final int index;
+  const editRecent(this.currentUsers, this.record, this.index);
   @override
-  State<StatefulWidget> createState() => _createRecordState();
+  State<StatefulWidget> createState() => _editRecentState();
 }
 
-class _createRecordState extends State<createRecord> {
+class _editRecentState extends State<editRecent>{
+  TabController _controller;
   final TextEditingController _categoryController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _notesController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
-   int _recordTypeController = 0;
+  int _recordTypeController = 0;
   int categoryId;
-
   List<bool> isSelected = [true, false];
   FocusNode focusIncome = FocusNode();
   FocusNode focusExpenses = FocusNode();
   List<FocusNode> focusToggle;
-
   @override
   void initState() {
     super.initState();
-    focusToggle = [focusIncome, focusExpenses];
-    _categoryController.text = "Food & Drinks";
+    _categoryController.text = widget.record.records[widget.index].category.name;
+    _notesController.text = widget.record.records[widget.index].notes;
+    _amountController.text = widget.record.records[widget.index].amount.toString();
+    categoryId = widget.record.records[widget.index].category.id;
   }
-
-  @override
-  void dispose() {
-    // Clean up the focus node when the Form is disposed.
-    focusIncome.dispose();
-    focusExpenses.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+
+
     String month = "";
-    switch (DateTime.now().month.toInt()) {
-      case 1:
-        {
-          month = "Jan";
-          print(month);
-        }
-        break;
+    switch(DateTime.now().month.toInt()) {
+      case 1: {
+        month = "Jan";
+        print(month);
+      }
+      break;
 
-      case 2:
-        {
-          month = "Feb";
-          print(month);
-        }
-        break;
-      case 3:
-        {
-          month = "Mar";
-          print(month);
-        }
-        break;
-      case 4:
-        {
-          month = "Apr";
-          print(month);
-        }
-        break;
-      case 5:
-        {
-          month = "May";
-          print(month);
-        }
-        break;
-      case 6:
-        {
-          month = "Jun";
-          print(month);
-        }
-        break;
-      case 7:
-        {
-          month = "July";
-          print(month);
-        }
-        break;
-      case 8:
-        {
-          month = "Aug";
-          print(month);
-        }
-        break;
-      case 9:
-        {
-          month = "Sep";
-          print(month);
-        }
-        break;
-      case 10:
-        {
-          month = "Oct";
-          print(month);
-        }
-        break;
-      case 11:
-        {
-          month = "Nov";
-          print(month);
-        }
-        break;
+      case 2: {
+        month = "Feb";
+        print(month);
+      }
+      break;
+      case 3: {
+        month = "Mar";
+        print(month);
+      }
+      break;
+      case 4: {
+        month = "Apr";
+        print(month);
+      }
+      break;
+      case 5: {
+        month = "May";
+        print(month);
+      }
+      break;
+      case 6: {
+        month = "Jun";
+        print(month);
+      }
+      break;
+      case 7: {
+        month = "July";
+        print(month);
+      }
+      break;
+      case 8: {
+        month = "Aug";
+        print(month);
+      }
+      break;
+      case 9: {
+        month = "Sep";
+        print(month);
+      }
+      break;
+      case 10: {
+        month = "Oct";
+        print(month);
+      }
+      break;
+      case 11: {
+        month = "Nov";
+        print(month);
+      }
+      break;
 
-      default:
-        {
-          month = "Dec";
-          print(month);
-        }
-        break;
+      default: {
+        month = "Dec";
+        print(month);
+      }
+      break;
     }
-    _dateController.text = month +
-        "-" +
-        DateTime.now().day.toString() +
-        "-" +
-        DateTime.now().year.toString();
-    _timeController.text =
-        DateTime.now().hour.toString() + ":" + DateTime.now().minute.toString();
+    _dateController.text = month+"-"+widget.record.records[widget.index].date.day.toString()+"-"+widget.record.records[widget.index].date.year.toString();
+    _timeController.text = DateTime.now().hour.toString()+":"+DateTime.now().minute.toString();
 
     return new Scaffold(
       appBar: new AppBar(
         centerTitle: true,
+        backgroundColor: Colors.teal,
+        title: Text("Edit Record",),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.pop(context, true),
-        ),
-        backgroundColor: Colors.teal,
-        title: Text(
-          "Add Record",
+          onPressed: () {
+            Navigator.pop(context, false);
+          },
         ),
         actions: <Widget>[
           IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: ()
+            {
+              _deleteRecord();
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.check),
-            onPressed: () {
-              _addRecord();
+            onPressed: ()
+            {
+              _editRecord();
             },
           ),
         ],
@@ -363,6 +352,9 @@ class _createRecordState extends State<createRecord> {
                               },
                             ),
                           ),
+                          SizedBox(
+                            width: 60.0,
+                          ),
                           Expanded(
                             child: TextFormField(
                               controller: _timeController,
@@ -397,6 +389,7 @@ class _createRecordState extends State<createRecord> {
                     SizedBox(
                       width: 300.0,
                       child: TextFormField(
+                        autofocus: false,
                         controller: _categoryController,
                         cursorColor: Colors.green,
                         decoration: InputDecoration(
@@ -407,7 +400,7 @@ class _createRecordState extends State<createRecord> {
                         ),
                         onTap: () async{
 
-                          List result = await Navigator.push(context, MaterialPageRoute(builder: (context) => category(-1, "")),
+                          List result = await Navigator.push(context, MaterialPageRoute(builder: (context) => category(categoryId, _categoryController.text)),
                           );
                           setState(() {
                             _categoryController.text = result[0].toString();
@@ -424,76 +417,125 @@ class _createRecordState extends State<createRecord> {
         ),
       )
     );
+
   }
 
-  void _addRecord() async {
+  void _editRecord() async{
     if (_formKey.currentState.validate()) {
-      if (categoryId == null) {
-        print("Category id: " + categoryId.toString());
+      if(categoryId==null)
+      {
+        print("Category id: "+ categoryId.toString());
         showDialog(
             context: context,
-            builder: (BuildContext context) {
+            builder: (BuildContext context){
               return SizedBox(
                 child: AlertDialog(
                   title: Text("Error Message"),
                   content: Text("No Category Selected"),
-                  actions: [
+                  actions:[
                     FlatButton(
-                      child: Text(
-                        "Select",
-                        style:
-                            TextStyle(fontSize: 20.0, color: Colors.redAccent),
+                      child: Text("Select",
+                        style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.redAccent
+                        ),
                       ),
-                      onPressed: () {
+                      onPressed: (){
                         Navigator.of(context).pop();
                       },
                     )
                   ],
                 ),
               );
-            });
-      } else {
+            }
+        );
+      }
+      else
+      {
         final record = {
           "record": {
             "amount": _amountController.text,
             "notes": _notesController.text,
-            "record_type": _recordTypeController,
+            "record_type": _controller.index,
             "date": _dateController.text,
             "category_id": categoryId,
           }
         };
         dataProvider().token(widget.currentUsers.token);
-        final response =
-            await dataProvider().addRecord(record, widget.currentUsers);
+        final response = await dataProvider().editRecord(record, widget.currentUsers, widget.record.records[widget.index].id.toString());
         //print(widget.currentUsers.token);
-        print("response  " + response.statusCode.toString());
-        if (response.statusCode == 200) {
-          Navigator.pop(context, true);
-        } else {
+
+        if(response.statusCode==200)
+        {
+          print("Status  Update success");
+          Navigator.pop(context,true);
+        }
+        else
+        {
           showDialog(
               context: context,
-              builder: (BuildContext context) {
+              builder: (BuildContext context){
                 return SizedBox(
                   child: AlertDialog(
                     title: Text("Error Message"),
                     content: Text(response.body),
-                    actions: [
+                    actions:[
                       FlatButton(
-                        child: Text(
-                          "Retry",
+                        child: Text("Retry",
                           style: TextStyle(
-                              fontSize: 20.0, color: Colors.redAccent),
+                              fontSize: 20.0,
+                              color: Colors.redAccent
+                          ),
                         ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
+                        onPressed: (){
+                          Navigator.pop(context,true);
                         },
                       )
                     ],
                   ),
                 );
-              });
+              }
+          );
         }
       }
     }
+
+  }
+  void _deleteRecord() async{
+    final response = await dataProvider().deleteRecord(widget.currentUsers, widget.record.records[widget.index].id.toString());
+    print(response.body);
+    if(response.statusCode==200)
+    {
+      print("Status: Delete Success");
+      Navigator.pop(context,true);
+    }
+    else
+    {
+      showDialog(
+          context: context,
+          builder: (BuildContext context){
+            return SizedBox(
+              child: AlertDialog(
+                title: Text("Error Message"),
+                content: Text(response.body),
+                actions:[
+                  FlatButton(
+                    child: Text("Retry",
+                      style: TextStyle(
+                          fontSize: 20.0,
+                          color: Colors.redAccent
+                      ),
+                    ),
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+            );
+          }
+      );
+    }
   }
 }
+

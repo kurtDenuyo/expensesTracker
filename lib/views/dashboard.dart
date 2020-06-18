@@ -9,6 +9,7 @@ import 'package:expensestracker/models/categoryModel.dart';
 import 'package:expensestracker/models/chart.dart';
 import 'package:expensestracker/models/recentFiveRecords.dart';
 import 'package:expensestracker/models/usersModel.dart';
+import 'package:expensestracker/views/editRecentRecords.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
@@ -57,6 +58,7 @@ class HomeState extends State<Home> {
   CategoryModel categoryModel;
   bool _hasData;
   double totalIncome, totalExpenses;
+  Color textColor = Colors.green;
   static const API = 'http://expenses.koda.ws/';
   Future<RecordsModel> loadRecords() async{
     final recordResponse = await dataProvider().fetchRecords(widget.currentUsers);
@@ -174,7 +176,7 @@ class HomeState extends State<Home> {
                           itemBuilder: (BuildContext contex, int index)
                           {
                             String month = "";
-                            switch(fiveRecords.records[fiveRecords.records.length-(index+1)].date.month) {
+                            switch(fiveRecords.records[index].date.month) {
                               case 1: {
                                 month = "Jan";
                                 print(month);
@@ -238,27 +240,35 @@ class HomeState extends State<Home> {
                               }
                               break;
                             }
+                            if(fiveRecords.records[index].recordType==1)
+                            {
+                              textColor = Colors.red;
+                            }
+                            else
+                              {
+                                textColor = Colors.green;
+                              }
                             print("index counter "+(fiveRecords.records.length-(index+1)).toString()+index.toString());
                             return ListTile(
                                //contentPadding: EdgeInsets.all(0.0),
-                              title: Text("₱ "+fiveRecords.records[fiveRecords.records.length-(index+1)].amount.toString(),
+                              title: Text("₱ "+fiveRecords.records[index].amount.toString(),
                                 style: TextStyle(
-                                  fontSize: 10.0,
-                                  color: Colors.green,
+                                  fontSize: 20.0,
+                                  color: textColor,
                                 ),),
-                              subtitle: Text(fiveRecords.records[fiveRecords.records.length-(index+1)].category.name.toString()+"  ---"+ fiveRecords.records[fiveRecords.records.length-(index+1)].notes.toString(),
+                              subtitle: Text(fiveRecords.records[index].category.name.toString()+"  ---"+ fiveRecords.records[index].notes.toString(),
                                 style: TextStyle(
-                                  fontSize: 10.0
+                                  fontSize: 15.0
                                 ),),
                               leading: Image.network(API+
-                                  categoryModel.categories[fiveRecords.records[fiveRecords.records.length-(index+1)].category.id-1].icon,
+                                  categoryModel.categories[fiveRecords.records[index].category.id-1].icon,
                                   fit: BoxFit.fill),
-                              trailing: Text(month+" "+fiveRecords.records[fiveRecords.records.length-(index+1)].date.day.toString()+" , "+fiveRecords.records[fiveRecords.records.length-(index+1)].date.year.toString(),
+                              trailing: Text(month+" "+fiveRecords.records[index].date.day.toString()+" , "+fiveRecords.records[index].date.year.toString(),
                                 style: TextStyle(
                                   fontSize: 10.0,
                                 ),),
                               onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, recordData, recordData.records.length-(index+1))))
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => editRecent(widget.currentUsers, fiveRecords, index)))
                                     .then((value) => value?_refreshHome():null);
                               },
                             );
