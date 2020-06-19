@@ -30,29 +30,6 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
-  Future<bool> _onBackPressed() {
-    return showDialog(
-      context: context,
-      builder: (context) => new AlertDialog(
-        title: new Text('You are about to log out!'),
-        content: new Text('Please confirm'),
-        actions: <Widget>[
-          new GestureDetector(
-            onTap: () => Navigator.of(context).pop(false),
-            child: Text("Cancel    "),
-          ),
-          SizedBox(height: 16),
-          new GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("    Log out"),
-          ),
-        ],
-      ),
-    ) ??
-        false;
-  }
   RecordsModel recordData;
   RecentFiveRecords fiveRecords;
   CategoryModel categoryModel;
@@ -96,31 +73,23 @@ class HomeState extends State<Home> {
     print("Load records");
     loadRecords();
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     //loadRecords();
-    return WillPopScope(
-      onWillPop: _onBackPressed,
-      child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          backgroundColor: Colors.teal,
-          title: Text("Home",),
-        ),
-        body: (_hasData==null)?
-        Center(
-          child: SpinKitWave(color: Colors.blueGrey, type: SpinKitWaveType.center),
-        )
-            :(_hasData)?
-            Center(
-                child: Padding(
-                 padding:EdgeInsets.all(20.0),
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Colors.teal,
+        title: Text("Home",),
+      ),
+      body: (_hasData==null)?
+      Center(
+        child: SpinKitWave(color: Colors.blueGrey, type: SpinKitWaveType.center),
+      )
+          :(_hasData)?
+      Center(
+          child: Padding(
+              padding:EdgeInsets.all(20.0),
               child: ListView(
                 children: <Widget>[
                   Container(
@@ -135,7 +104,7 @@ class HomeState extends State<Home> {
                           padding:EdgeInsets.only(left: 10.0, top: 10.0),
                           child: Text("OVERVIEW",
                             style: TextStyle(
-                              fontSize: 16.0,
+                                fontSize: 16.0,
                                 fontFamily: 'Nunito-Bold'
                             ),),
                         ),
@@ -245,12 +214,12 @@ class HomeState extends State<Home> {
                               textColor = Colors.red;
                             }
                             else
-                              {
-                                textColor = Colors.green;
-                              }
+                            {
+                              textColor = Colors.green;
+                            }
                             print("index counter "+(fiveRecords.records.length-(index+1)).toString()+index.toString());
                             return ListTile(
-                               //contentPadding: EdgeInsets.all(0.0),
+                              //contentPadding: EdgeInsets.all(0.0),
                               title: Text("₱ "+fiveRecords.records[index].amount.toString(),
                                 style: TextStyle(
                                   fontSize: 20.0,
@@ -258,7 +227,7 @@ class HomeState extends State<Home> {
                                 ),),
                               subtitle: Text(fiveRecords.records[index].category.name.toString()+"  ---"+ fiveRecords.records[index].notes.toString(),
                                 style: TextStyle(
-                                  fontSize: 15.0
+                                    fontSize: 15.0
                                 ),),
                               leading: Image.network(API+
                                   categoryModel.categories[fiveRecords.records[index].category.id-1].icon,
@@ -278,163 +247,162 @@ class HomeState extends State<Home> {
                     ),
                   ),
                   Container(
-                    height: 50.0,
+                      height: 50.0,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black12, width: 1),
                       ),
-                    child: Center(
-                      child: new InkWell(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => allRecords(widget.currentUsers)),)
-                              .then((value) => value?_refreshHome():null);
-                        },
-                        child: new Text('View More',
-                            style: TextStyle(
-                              fontFamily: 'Nunito-Regular',
-                              fontSize: 16.0
-                            )
-                        ),
+                      child: Center(
+                          child: new InkWell(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => allRecords(widget.currentUsers)),)
+                                  .then((value) => value?_refreshHome():null);
+                            },
+                            child: new Text('View More',
+                                style: TextStyle(
+                                    fontFamily: 'Nunito-Regular',
+                                    fontSize: 16.0
+                                )
+                            ),
+                          )
                       )
-                    )
                   )
                 ],
               )
-            )
-        )
-            :
-        Container(
-          color: Colors.green[100],
-          child: Center(
-            child: Column(
+          )
+      )
+          :
+      Container(
+        color: Colors.green[100],
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 60.0,
+              ),
+              SizedBox(
+                height: 120.0,
+                width: 450.0,
+                child: Image.asset(
+                  "assets/images/empty_icon.png",
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(
+                height: 20.0,
+              ),
+              Text("There are no records here yet.",
+                style: TextStyle(
+                  fontFamily: 'Nunito-Regular',
+                  fontSize: 16.0,
+                  // fontWeight: FontWeight.bold,
+                  color: Colors.black26,
+                ),
+              ),
+              SizedBox(
+                height: 140.0,
+              ),
+              SizedBox(
+                height: 60.0,
+                width: 300.0,
+                child: RaisedButton(
+                  padding: const EdgeInsets.all(8.0),
+                  color: Colors.white70,
+                  textColor: Colors.black,
+                  onPressed: (){
+
+                    //loadRecords();
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => createRecord(widget.currentUsers)),)
+                        .then((value) => value?_refreshHome():null);
+                  },
+                  child: new Text("START TRACKING",
+                    style: TextStyle(
+                        fontFamily: 'Nunito-Bold',
+                        fontSize: 20.0
+                    ),),
+
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      drawer: Drawer(
+          child: Container(
+            color: Colors.teal,
+            child: ListView(
+              padding: EdgeInsets.zero,
               children: <Widget>[
                 SizedBox(
-                  height: 60.0,
+                  height: 150.0,
                 ),
-                SizedBox(
-                  height: 120.0,
-                  width: 450.0,
-                  child: Image.asset(
-                    "assets/images/empty_icon.png",
-                    fit: BoxFit.contain,
+                ListTile(
+                  title: Row(
+                    children: <Widget>[
+                      Icon(Icons.home),
+                      Padding(
+                        padding:EdgeInsets.only(left:10.0),
+                        child: Text('HOME',
+                          style: TextStyle(
+                              fontFamily: 'Nunito-Regular'
+                          ),),
+                      )
+                    ],
                   ),
+                  onTap: () {
+                    Navigator.pop(context,true);
+                  },
                 ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Text("There are no records here yet.",
-                  style: TextStyle(
-                    fontFamily: 'Nunito-Regular',
-                    fontSize: 16.0,
-                    // fontWeight: FontWeight.bold,
-                    color: Colors.black26,
+                ListTile(
+                  title: Row(
+                    children: <Widget>[
+                      Icon(Icons.category),
+                      Padding(
+                        padding:EdgeInsets.only(left:8.0),
+                        child: Text('RECORDS',
+                          style: TextStyle(
+                              fontFamily: 'Nunito-Regular'
+                          ),),
+                      )
+                    ],
                   ),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => allRecords(widget.currentUsers)),)
+                        .then((value) => value?_refreshHome():null);
+                  },
                 ),
-                SizedBox(
-                  height: 140.0,
-                ),
-                SizedBox(
-                  height: 60.0,
-                  width: 300.0,
-                  child: RaisedButton(
-                    padding: const EdgeInsets.all(8.0),
-                    color: Colors.white70,
-                    textColor: Colors.black,
-                    onPressed: (){
 
-                      //loadRecords();
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => createRecord(widget.currentUsers)),)
-                          .then((value) => value?_refreshHome():null);
-                    },
-                    child: new Text("START TRACKING",
-                      style: TextStyle(
-                          fontFamily: 'Nunito-Bold',
-                          fontSize: 20.0
-                      ),),
-
+                ListTile(
+                  title: Row(
+                    children: <Widget>[
+                      Icon(Icons.settings_power),
+                      Padding(
+                        padding:EdgeInsets.only(left:8.0),
+                        child: Text('LOGOUT',
+                          style: TextStyle(
+                              fontFamily: 'Nunito-Regular'
+                          ),),
+                      )
+                    ],
                   ),
+                  onTap: () {
+                    dispose();
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
+                        MyApp()), (Route<dynamic> route) => false);
+                  },
                 ),
               ],
             ),
-          ),
-        ),
-        drawer: Drawer(
-            child: Container(
-              color: Colors.teal,
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  SizedBox(
-                    height: 150.0,
-                  ),
-                  ListTile(
-                    title: Row(
-                      children: <Widget>[
-                        Icon(Icons.home),
-                        Padding(
-                          padding:EdgeInsets.only(left:10.0),
-                          child: Text('HOME',
-                            style: TextStyle(
-                                fontFamily: 'Nunito-Regular'
-                            ),),
-                        )
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.pop(context,true);
-                    },
-                  ),
-                  ListTile(
-                    title: Row(
-                      children: <Widget>[
-                        Icon(Icons.category),
-                        Padding(
-                          padding:EdgeInsets.only(left:8.0),
-                          child: Text('RECORDS',
-                            style: TextStyle(
-                                fontFamily: 'Nunito-Regular'
-                            ),),
-                        )
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => allRecords(widget.currentUsers)),)
-                          .then((value) => value?_refreshHome():null);
-                    },
-                  ),
-
-                  ListTile(
-                    title: Row(
-                      children: <Widget>[
-                        Icon(Icons.settings_power),
-                        Padding(
-                          padding:EdgeInsets.only(left:8.0),
-                          child: Text('LOGOUT',
-                            style: TextStyle(
-                                fontFamily: 'Nunito-Regular'
-                            ),),
-                        )
-                      ],
-                    ),
-                    onTap: () {
-                      dispose();
-                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
-                          MyApp()), (Route<dynamic> route) => false);
-                    },
-                  ),
-                ],
-              ),
-            )
-        ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.teal,
-          onPressed: (){
-            print(widget.currentUsers.token);
-            Navigator.push(context, MaterialPageRoute(builder: (context) => createRecord(widget.currentUsers)),)
-            .then((value) => value?_refreshHome():null);
-          },
-          child: Icon(Icons.add),
-        ), //
+          )
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.teal,
+        onPressed: (){
+          print(widget.currentUsers.token);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => createRecord(widget.currentUsers)),)
+              .then((value) => value?_refreshHome():null);
+        },
+        child: Icon(Icons.add),
+      ), //
     );
 
   }

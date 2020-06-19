@@ -1,6 +1,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 import 'package:expensestracker/Data/data_provider.dart';
 import 'package:expensestracker/models/Records.dart';
 import 'package:expensestracker/models/categoryModel.dart';
@@ -19,7 +20,8 @@ class allRecords extends StatefulWidget {
   State<StatefulWidget> createState() => _allRecordsState();
 }
 class _allRecordsState extends State<allRecords> {
-  RecordsModel recordData, searchResults;
+  int present, perPage;
+  RecordsModel recordData, searchResults, paginationRecord;
   CategoryModel categoryModel;
   bool _hasData;
   bool activeSearch;
@@ -28,7 +30,7 @@ class _allRecordsState extends State<allRecords> {
   Color textColor = Colors.green;
   static const API = 'http://expenses.koda.ws/';
   Future<RecordsModel> loadRecords() async{
-    final recordResponse = await dataProvider().fetchRecords(widget.currentUsers);
+    RecordsModel recordResponse = await dataProvider().fetchRecords(widget.currentUsers);
     final categoryResponse = await dataProvider().fetchCategory();
     //print("Result ");
     //print("Total content "+recordResponse.records[0].category.name.toString());
@@ -41,7 +43,11 @@ class _allRecordsState extends State<allRecords> {
       else {
         recordData = recordResponse;
         categoryModel = categoryResponse;
+        //present = present + recordResponse.pagination.current;
+       // perPage = recordResponse.pagination.perPage;
+        paginationRecord = recordData;
         _hasData = true;
+        print(present.toString()+" Page "+perPage.toString());
         print("Record succssfully fetch");
       }
     });
@@ -54,6 +60,51 @@ class _allRecordsState extends State<allRecords> {
     activeSearch = false;
     _searchHasData = false;
   }
+  void backLoadMore() async{
+    print("Reach buttom: Load more");
+    if(recordData.pagination.current > 1)
+    {
+      paginationRecord = await dataProvider().seed(widget.currentUsers, recordData.pagination.previousUrl);
+      print("recordData "+ recordData.records.length.toString());
+      print("paginationrecord "+paginationRecord.records.length.toString());
+      print("final records "+ recordData.records.length.toString());
+      setState(() {
+        recordData = paginationRecord;
+        //recordData.records.addAll(paginationRecord.records);
+        //paginationRecord.records = null;
+        // print("Current page "+ recordData.pagination.current.toString());
+        //_refreshHome();
+      });
+    }
+    else
+    {
+      print("Youre in top");
+    }
+
+  }
+  void loadMore() async{
+    print("Reach buttom: Load more");
+    if(recordData.pagination.current < recordData.pagination.pages)
+      {
+        paginationRecord = await dataProvider().seed(widget.currentUsers, recordData.pagination.nextUrl);
+        print("recordData "+ recordData.records.length.toString());
+        print("paginationrecord "+paginationRecord.records.length.toString());
+        print("final records "+ recordData.records.length.toString());
+        setState(() {
+          recordData = paginationRecord;
+          //recordData.records.addAll(paginationRecord.records);
+          //paginationRecord.records = null;
+         // print("Current page "+ recordData.pagination.current.toString());
+          //_refreshHome();
+        });
+      }
+    else
+      {
+        print("End of records");
+      }
+
+  }
+
   void _refreshHome() async{
 
     loadRecords();
@@ -129,222 +180,240 @@ class _allRecordsState extends State<allRecords> {
       :(_searchHasData)?
       Container(
         height: 1000.0,
-        child: ListView.builder(
-          scrollDirection: Axis.vertical,
-          padding:EdgeInsets.only(left: 20.0,right: 20.0),
-          shrinkWrap: true,
-          itemCount: (_searchHasData)?searchResults.records.length:0,
-          itemBuilder: (BuildContext contex, int index)
-          {
-            String month = "";
-            switch(searchResults.records[index].date.month) {
-              case 1: {
-                month = "Jan";
-                print(month);
-              }
-              break;
-
-              case 2: {
-                month = "Feb";
-                print(month);
-              }
-              break;
-              case 3: {
-                month = "Mar";
-                print(month);
-              }
-              break;
-              case 4: {
-                month = "Apr";
-                print(month);
-              }
-              break;
-              case 5: {
-                month = "May";
-                print(month);
-              }
-              break;
-              case 6: {
-                month = "Jun";
-                print(month);
-              }
-              break;
-              case 7: {
-                month = "July";
-                print(month);
-              }
-              break;
-              case 8: {
-                month = "Aug";
-                print(month);
-              }
-              break;
-              case 9: {
-                month = "Sep";
-                print(month);
-              }
-              break;
-              case 10: {
-                month = "Oct";
-                print(month);
-              }
-              break;
-              case 11: {
-                month = "Nov";
-                print(month);
-              }
-              break;
-
-              default: {
-                month = "Dec";
-                print(month);
-              }
-              break;
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo){
+            if(scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent){
+              loadMore();
             }
-            if(searchResults.records[index].recordType==1)
-            {
-              textColor = Colors.red;
+            if(scrollInfo.metrics.pixels == scrollInfo.metrics.minScrollExtent){
+              backLoadMore();
             }
-            else
-            {
-              textColor = Colors.green;
-            }
-            print("index counter "+(searchResults.records.length-(index+1)).toString()+index.toString());
-            return ListTile(
-              //contentPadding: EdgeInsets.all(0.0),
-              title: Text("₱ "+searchResults.records[index].amount.toString(),
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: textColor,
-                ),),
-              subtitle: Text(searchResults.records[index].category.name.toString()+"  ---"+ searchResults.records[index].notes.toString(),
-                style: TextStyle(
-                    fontSize: 15.0
-                ),),
-              leading: Image.network(API+
-                  categoryModel.categories[searchResults.records[index].category.id-1].icon,
-                  fit: BoxFit.fill),
-              trailing: Text(month+" "+searchResults.records[index].date.day.toString()+" , "+searchResults.records[index].date.year.toString(),
-                style: TextStyle(
-                  fontSize: 10.0,
-                ),),
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, searchResults, index)))
-                    .then((value) => value?_refreshHome():null);
-              },
-            );
           },
-        ),
+          child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            padding:EdgeInsets.only(left: 20.0,right: 20.0),
+            shrinkWrap: true,
+            itemCount: (_searchHasData) ? searchResults.records.length : 0,
+            itemBuilder: (BuildContext contex, int index)
+            {
+              String month = "";
+              switch(searchResults.records[index].date.month) {
+                case 1: {
+                  month = "Jan";
+                  print(month);
+                }
+                break;
+
+                case 2: {
+                  month = "Feb";
+                  print(month);
+                }
+                break;
+                case 3: {
+                  month = "Mar";
+                  print(month);
+                }
+                break;
+                case 4: {
+                  month = "Apr";
+                  print(month);
+                }
+                break;
+                case 5: {
+                  month = "May";
+                  print(month);
+                }
+                break;
+                case 6: {
+                  month = "Jun";
+                  print(month);
+                }
+                break;
+                case 7: {
+                  month = "July";
+                  print(month);
+                }
+                break;
+                case 8: {
+                  month = "Aug";
+                  print(month);
+                }
+                break;
+                case 9: {
+                  month = "Sep";
+                  print(month);
+                }
+                break;
+                case 10: {
+                  month = "Oct";
+                  print(month);
+                }
+                break;
+                case 11: {
+                  month = "Nov";
+                  print(month);
+                }
+                break;
+
+                default: {
+                  month = "Dec";
+                  print(month);
+                }
+                break;
+              }
+              if(searchResults.records[index].recordType==1)
+              {
+                textColor = Colors.red;
+              }
+              else
+              {
+                textColor = Colors.green;
+              }
+              return ListTile(
+                //contentPadding: EdgeInsets.all(0.0),
+                title: Text("₱ "+searchResults.records[index].amount.toString(),
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: textColor,
+                  ),),
+                subtitle: Text(searchResults.records[index].category.name.toString()+"  ---"+ searchResults.records[index].notes.toString(),
+                  style: TextStyle(
+                      fontSize: 15.0
+                  ),),
+                leading: Image.network(API+
+                    categoryModel.categories[searchResults.records[index].category.id-1].icon,
+                    fit: BoxFit.fill),
+                trailing: Text(month+" "+searchResults.records[index].date.day.toString()+" , "+searchResults.records[index].date.year.toString(),
+                  style: TextStyle(
+                    fontSize: 10.0,
+                  ),),
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, searchResults, index)))
+                      .then((value) => value?_refreshHome():null);
+                },
+              );
+            },
+          ),
+        )
       )
           :(_hasData)?
       Container(
         height: 1000.0,
-        child: ListView.builder(
-          scrollDirection: Axis.vertical,
-          padding:EdgeInsets.only(left: 20.0,right: 20.0),
-          shrinkWrap: true,
-          itemCount: recordData.records.length,
-          itemBuilder: (BuildContext contex, int index)
-          {
-            String month = "";
-            switch(recordData.records[index].date.month) {
-              case 1: {
-                month = "Jan";
-                print(month);
-              }
-              break;
-
-              case 2: {
-                month = "Feb";
-                print(month);
-              }
-              break;
-              case 3: {
-                month = "Mar";
-                print(month);
-              }
-              break;
-              case 4: {
-                month = "Apr";
-                print(month);
-              }
-              break;
-              case 5: {
-                month = "May";
-                print(month);
-              }
-              break;
-              case 6: {
-                month = "Jun";
-                print(month);
-              }
-              break;
-              case 7: {
-                month = "July";
-                print(month);
-              }
-              break;
-              case 8: {
-                month = "Aug";
-                print(month);
-              }
-              break;
-              case 9: {
-                month = "Sep";
-                print(month);
-              }
-              break;
-              case 10: {
-                month = "Oct";
-                print(month);
-              }
-              break;
-              case 11: {
-                month = "Nov";
-                print(month);
-              }
-              break;
-
-              default: {
-                month = "Dec";
-                print(month);
-              }
-              break;
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo){
+            if(scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent){
+              loadMore();
             }
-            if(recordData.records[index].recordType==1)
-            {
-              textColor = Colors.red;
+            if(scrollInfo.metrics.pixels == scrollInfo.metrics.minScrollExtent){
+              backLoadMore();
             }
-            else
-            {
-              textColor = Colors.green;
-            }
-            print("index counter "+(recordData.records.length-(index+1)).toString()+index.toString());
-            return ListTile(
-              //contentPadding: EdgeInsets.all(0.0),
-              title: Text("₱ "+recordData.records[index].amount.toString(),
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: textColor,
-                ),),
-              subtitle: Text(recordData.records[index].category.name.toString()+"  ---"+ recordData.records[index].notes.toString(),
-                style: TextStyle(
-                    fontSize: 15.0
-                ),),
-              leading: Image.network(API+
-                  categoryModel.categories[recordData.records[index].category.id-1].icon,
-                  fit: BoxFit.fill),
-              trailing: Text(month+" "+recordData.records[index].date.day.toString()+" , "+recordData.records[index].date.year.toString(),
-                style: TextStyle(
-                  fontSize: 10.0,
-                ),),
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, recordData, index)))
-                    .then((value) => value?_refreshHome():null);
-              },
-            );
           },
-        ),
+          child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            padding:EdgeInsets.only(left: 20.0,right: 20.0),
+            shrinkWrap: true,
+            itemCount: recordData.records.length,
+            itemBuilder: (BuildContext contex, int index)
+            {
+              String month = "";
+              switch(recordData.records[index].date.month) {
+                case 1: {
+                  month = "Jan";
+                  print(month);
+                }
+                break;
+
+                case 2: {
+                  month = "Feb";
+                  print(month);
+                }
+                break;
+                case 3: {
+                  month = "Mar";
+                  print(month);
+                }
+                break;
+                case 4: {
+                  month = "Apr";
+                  print(month);
+                }
+                break;
+                case 5: {
+                  month = "May";
+                  print(month);
+                }
+                break;
+                case 6: {
+                  month = "Jun";
+                  print(month);
+                }
+                break;
+                case 7: {
+                  month = "July";
+                  print(month);
+                }
+                break;
+                case 8: {
+                  month = "Aug";
+                  print(month);
+                }
+                break;
+                case 9: {
+                  month = "Sep";
+                  print(month);
+                }
+                break;
+                case 10: {
+                  month = "Oct";
+                  print(month);
+                }
+                break;
+                case 11: {
+                  month = "Nov";
+                  print(month);
+                }
+                break;
+
+                default: {
+                  month = "Dec";
+                  print(month);
+                }
+                break;
+              }
+              if(recordData.records[index].recordType==1)
+              {
+                textColor = Colors.red;
+              }
+              else
+              {
+                textColor = Colors.green;
+              }
+              return ListTile(
+                //contentPadding: EdgeInsets.all(0.0),
+                title: Text("₱ "+recordData.records[index].amount.toString(),
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: textColor,
+                  ),),
+                subtitle: Text(recordData.records[index].category.name.toString()+"  ---"+ recordData.records[index].notes.toString(),
+                  style: TextStyle(
+                      fontSize: 15.0
+                  ),),
+                leading: Image.network(API+
+                    categoryModel.categories[recordData.records[index].category.id-1].icon,
+                    fit: BoxFit.fill),
+                trailing: Text(month+" "+recordData.records[index].date.day.toString()+" , "+recordData.records[index].date.year.toString(),
+                  style: TextStyle(
+                    fontSize: 10.0,
+                  ),),
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, recordData, index)))
+                      .then((value) => value?_refreshHome():null);
+                },
+              );
+            },
+          ),
+        )
       )
           :
       Container(

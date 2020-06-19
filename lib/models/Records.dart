@@ -5,7 +5,6 @@
 import 'dart:convert';
 
 RecordsModel recordsModelFromJson(String str) => RecordsModel.fromJson(json.decode(str));
-
 String recordsModelToJson(RecordsModel data) => json.encode(data.toJson());
 
 class RecordsModel {

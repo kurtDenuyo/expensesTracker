@@ -456,7 +456,7 @@ class _editRecentState extends State<editRecent>{
           "record": {
             "amount": _amountController.text,
             "notes": _notesController.text,
-            "record_type": _controller.index,
+            "record_type": _recordTypeController,
             "date": _dateController.text,
             "category_id": categoryId,
           }
