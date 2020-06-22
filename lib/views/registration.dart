@@ -5,6 +5,7 @@ import 'package:expensestracker/models/users.dart';
 import 'package:expensestracker/models/usersModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
 import 'dashboard.dart';
@@ -21,9 +22,8 @@ class _RegistrationState extends State<Registration>{
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-
+  final storage = new FlutterSecureStorage();
   dataProvider get notesService => GetIt.I<dataProvider>();
-  bool _isLoading = false;
   String errorMessage;
 
   @override
@@ -185,6 +185,8 @@ class _RegistrationState extends State<Registration>{
                                     {
                                       final result = userModelFromJson(response.body);
                                       //on success navigate to dashboard
+                                      await storage.write(key: "email", value: _emailController.text);
+                                      await storage.write(key: "password", value: _passwordController.text);
                                       print("Register user success with response token "+result.token);
                                       Navigator.push(context, MaterialPageRoute(builder: (context) => Home(result)),
                                       );

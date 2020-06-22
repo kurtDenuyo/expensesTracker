@@ -14,6 +14,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../main.dart';
@@ -30,6 +31,7 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
+  final storage = new FlutterSecureStorage();
   RecordsModel recordData;
   RecentFiveRecords fiveRecords;
   CategoryModel categoryModel;
@@ -384,8 +386,9 @@ class HomeState extends State<Home> {
                       )
                     ],
                   ),
-                  onTap: () {
-                    dispose();
+                  onTap: () async{
+                    await storage.readAll();
+                    await storage.deleteAll();
                     Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
                         MyApp()), (Route<dynamic> route) => false);
                   },

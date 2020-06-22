@@ -28,7 +28,7 @@ class dataProvider {
     return response;
 
   }
-  Future<UserModel> loginUser(String email, String password) async{
+  Future<http.Response> loginUser(String email, String password) async{
     final response = await http.post(
         API + 'api/v1/sign_in',
         headers: <String, String>{
@@ -38,10 +38,8 @@ class dataProvider {
           'email': email,
           'password': password
         }));
-    final result = userModelFromJson(response.body);
-    //print(result.records.length.toString());
-    //print("result from json"+result.records[1].amount.toString());
-    return result;
+    print(response.statusCode);
+    return response;
   }
   Future<http.Response> addRecord(Map record, UserModel currentUsers) {
     _token = currentUsers.token;
@@ -162,7 +160,7 @@ class dataProvider {
     return result;
   }
 
-  Future<RecordsModel> seed(UserModel currentUsers, String url) async{
+  Future<RecordsModel> loadMore(UserModel currentUsers, String url) async{
     _token = currentUsers.token;
     final response = await http.get(
       API + url,

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:expensestracker/views/registration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'loginPage.dart';
 
@@ -11,6 +14,30 @@ class onBoarding extends StatefulWidget {
 }
 
 class _onBoardingState extends State<onBoarding>{
+  final storage = new FlutterSecureStorage();
+  var email;
+  var pass;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    startTimer();
+  }
+  void startTimer() {
+    Timer(Duration(seconds:1), () {
+      navigateUser(); //It will redirect  after 3 seconds
+    });
+  }
+  void navigateUser() async{
+    email = await storage.read(key: "email");
+    pass = await storage.read(key: "password");
+
+   if(email != null)
+     {
+       Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(email, pass)),);
+     }
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -91,8 +118,7 @@ class _onBoardingState extends State<onBoarding>{
             ),
             new InkWell(
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage("", "")),);
               },
               child: new Text("I already have an account.",
                 style: TextStyle(

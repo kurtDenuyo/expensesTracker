@@ -3,33 +3,77 @@
 import 'dart:convert';
 
 import 'package:expensestracker/Data/data_provider.dart';
+import 'package:expensestracker/models/usersModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'dashboard.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key}) : super(key: key);
+  final String email, password;
+  const LoginPage(this.email, this.password);
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage>{
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+   TextEditingController _emailController = TextEditingController();
+   TextEditingController _passwordController = TextEditingController();
 
-  bool _isLoading = false;
+  final storage = new FlutterSecureStorage();
+  var email;
+  var pass;
   String errorMessage;
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
-
-
+    getCurrentlyLoggedUser();
   }
-
+  void getCurrentlyLoggedUser() async{
+    if(widget.email!="")
+    {
+      _emailController.text = widget.email;
+      _passwordController.text = widget.password;
+      final response = await dataProvider().loginUser(_emailController.text, _passwordController.text);
+      if(response.statusCode == 200)
+      {
+        final result = userModelFromJson(response.body);
+        //on success navigate to dashboard
+        print("Login success with username"+result.user.email);
+         Navigator.push(context, MaterialPageRoute(builder: (context) => Home(result)),);
+      }
+      else
+      {
+        showDialog(
+            context: context,
+            builder: (BuildContext context){
+              return SizedBox(
+                child: AlertDialog(
+                  title: Text("Error Message"),
+                  content: Text(response.body),
+                  actions:[
+                    FlatButton(
+                      child: Text("Retry",
+                        style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.redAccent
+                        ),
+                      ),
+                      onPressed: (){
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                ),
+              );
+            }
+        );
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,16 +179,16 @@ class _LoginPageState extends State<LoginPage>{
                               onPressed: () async{
                                 if(_formKey.currentState.validate())
                                   {
-                                    final result = await dataProvider().loginUser(_emailController.text, _passwordController.text);
-                                    print(result.token);
-                                   print(result.user.id);
-                                   // final logged_users = loginUsers().fromJson(json.decode((result.body)));
-                                    if(result.token!=null)
-                                      {
-                                        //on success navigate to dashboard
-                                        print("Login success with username"+result.user.email);
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(result)),);
-                                      }
+                                    final response = await dataProvider().loginUser(_emailController.text, _passwordController.text);
+                                    if(response.statusCode == 200)
+                                    {
+                                      final result = userModelFromJson(response.body);
+                                      //on success navigate to dashboard
+                                      await storage.write(key: "email", value: _emailController.text);
+                                       await storage.write(key: "password", value: _passwordController.text);
+                                      print("Login success with username"+result.user.email);
+                                       Navigator.push(context, MaterialPageRoute(builder: (context) => Home(result)),);
+                                    }
                                     else
                                       {
                                         showDialog(
@@ -153,7 +197,7 @@ class _LoginPageState extends State<LoginPage>{
                                               return SizedBox(
                                                 child: AlertDialog(
                                                   title: Text("Error Message"),
-                                                  content: Text(result.toString()),
+                                                  content: Text(response.body),
                                                   actions:[
                                                     FlatButton(
                                                       child: Text("Retry",
