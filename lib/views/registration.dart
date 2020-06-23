@@ -99,6 +99,9 @@ class _RegistrationState extends State<Registration>{
                                       fontFamily: 'Nunito-Regular'
                                   ),
                                 ),
+                                SizedBox(
+                                  height: 10.0,
+                                ),
                                 TextFormField(
                                   cursorColor: Colors.green,
                                   decoration: InputDecoration(
@@ -119,6 +122,9 @@ class _RegistrationState extends State<Registration>{
                                       fontFamily: 'Nunito-Regular'
                                   ),
                                 ),
+                                SizedBox(
+                                  height: 10.0,
+                                ),
                                 TextFormField(
                                   cursorColor: Colors.green,
                                   decoration: InputDecoration(
@@ -138,6 +144,9 @@ class _RegistrationState extends State<Registration>{
                                   style: TextStyle(
                                       fontFamily: 'Nunito-Regular'
                                   ),
+                                ),
+                                SizedBox(
+                                  height: 10.0,
                                 ),
                                 TextFormField(
                                   cursorColor: Colors.green,

@@ -29,25 +29,16 @@ class _createRecordState extends State<createRecord> {
   FocusNode focusIncome = FocusNode();
   FocusNode focusExpenses = FocusNode();
   List<FocusNode> focusToggle;
-
+  String month = "";
+  var _savedDate, _savedTime;
   @override
   void initState() {
     super.initState();
     focusToggle = [focusIncome, focusExpenses];
     _categoryController.text = "Food & Drinks";
-  }
-
-  @override
-  void dispose() {
-    // Clean up the focus node when the Form is disposed.
-    focusIncome.dispose();
-    focusExpenses.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String month = "";
+    categoryId = 1;
+    _savedDate = DateTime.now();
+    _savedDate = DateTime.now();
     switch (DateTime.now().month.toInt()) {
       case 1:
         {
@@ -132,6 +123,18 @@ class _createRecordState extends State<createRecord> {
     _timeController.text =
         DateTime.now().hour.toString() + ":" + DateTime.now().minute.toString();
 
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    focusIncome.dispose();
+    focusExpenses.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         centerTitle: true,
@@ -215,6 +218,9 @@ class _createRecordState extends State<createRecord> {
                       },
                     ),
                     SizedBox(
+                      height: 10.0,
+                    ),
+                    SizedBox(
                       width: 300.0,
                       child: TextFormField(
                         cursorColor: Colors.green,
@@ -243,6 +249,9 @@ class _createRecordState extends State<createRecord> {
                       ),
                     ),
                     SizedBox(
+                      height: 10.0,
+                    ),
+                    SizedBox(
                       width: 300.0,
                       child: TextFormField(
                         cursorColor: Colors.green,
@@ -269,6 +278,9 @@ class _createRecordState extends State<createRecord> {
                       ),
                     ),
                     SizedBox(
+                      height: 10.0,
+                    ),
+                    SizedBox(
                       width: 300.0,
                       child: Row(
                         children: <Widget>[
@@ -291,7 +303,7 @@ class _createRecordState extends State<createRecord> {
                                       print('change $date');
                                     },
                                     onConfirm: (date) {
-                                      //_dateController.text = date.toIso8601String();
+
                                       switch(date.month.toInt()) {
                                         case 1: {
                                           month = "Jan";
@@ -356,8 +368,8 @@ class _createRecordState extends State<createRecord> {
                                         }
                                         break;
                                       }
+                                      _savedDate = date;
                                       _dateController.text = month+"-"+date.day.toString()+"-"+date.year.toString();
-                                      print('confirm $date');
                                     },
                                     currentTime: DateTime.now(), locale: LocaleType.en);
                               },
@@ -383,9 +395,9 @@ class _createRecordState extends State<createRecord> {
                                     print('change $time');
                                   },
                                   onConfirm: (time) {
-                                    //_dateController.text = date.toIso8601String();
+                                  _savedTime = time;
                                     _timeController.text = time.hour.toString()+":"+time.minute.toString();
-                                    print('confirm $time');
+                                     print('confirm $time');
                                   },
                                 );
                               },
@@ -393,6 +405,9 @@ class _createRecordState extends State<createRecord> {
                           )
                         ],
                       ),
+                    ),
+                    SizedBox(
+                      height: 10.0,
                     ),
                     SizedBox(
                       width: 300.0,
@@ -458,16 +473,15 @@ class _createRecordState extends State<createRecord> {
             "amount": _amountController.text,
             "notes": _notesController.text,
             "record_type": _recordTypeController,
-            "date": _dateController.text,
+            "date": new DateTime(_savedDate.year, _savedDate.month, _savedDate.day, _savedTime.hour, _savedTime.minute).toIso8601String(),
             "category_id": categoryId,
           }
         };
+        print("Final date to be saved "+new DateTime(_savedDate.year, _savedDate.month, _savedDate.day, _savedTime.hour, _savedTime.minute).toIso8601String());
         dataProvider().token(widget.currentUsers.token);
-        final response =
-            await dataProvider().addRecord(record, widget.currentUsers);
-        //print(widget.currentUsers.token);
-        print("response  " + response.statusCode.toString());
+        final response = await dataProvider().addRecord(record, widget.currentUsers);
         if (response.statusCode == 200) {
+          print("Successfully save");
           Navigator.pop(context, true);
         } else {
           showDialog(

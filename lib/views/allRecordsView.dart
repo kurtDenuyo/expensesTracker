@@ -23,20 +23,24 @@ class _allRecordsState extends State<allRecords> {
   bool activeSearch;
   bool _searchHasData;
   Future _initialLoad;
+  String nextUrl;
   final TextEditingController _searchText = TextEditingController();
   Color textColor = Colors.green;
   static const API = 'http://expenses.koda.ws/';
-  Future _loadMoreItems() async {
+  Future _loadMoreItems(String next) async {
     await Future.delayed(Duration(seconds: 3), () async{
-      paginationRecord = await dataProvider().loadMore(widget.currentUsers, recordData.pagination.nextUrl);
-      recordData.records.addAll(paginationRecord.records);
-    });
-    _hasMore = recordData.records.length < recordData.pagination.count;
-    print("New Total "+ recordData.records.length.toString());
-    print("Current page "+ recordData.pagination.current.toString());
-    print("has more? "+ _hasMore.toString());
-  }
+      paginationRecord = await dataProvider().loadMore(widget.currentUsers, next);
+      setState(() {
+        nextUrl = paginationRecord.pagination.nextUrl;
+        recordData.records.addAll(paginationRecord.records);
+        _hasMore = recordData.records.length < recordData.pagination.count;
+        print("New Total "+ recordData.records.length.toString());
+        print("Current page "+ paginationRecord.pagination.current.toString());
+        print("has more? "+ _hasMore.toString());
+      });
 
+    });
+  }
   @override
   void initState() {
     super.initState();
@@ -50,10 +54,20 @@ class _allRecordsState extends State<allRecords> {
       recordData = recordResponse;
       categoryModel = categoryResponse;
       _hasMore = false;
-    //  _hasMore = recordData.pagination.current < recordData.pagination.pages;
     });
   }
   void _refreshHome() async{
+    setState(() {
+      _initialLoad = Future.delayed(Duration(seconds: 1),() async{
+        RecordsModel recordResponse = await dataProvider().fetchRecords(widget.currentUsers);
+        final categoryResponse = await dataProvider().fetchCategory();
+        print("Reloaded "+ recordResponse.records.length.toString());
+        print("Reloaded "+ categoryResponse.categories.length.toString());
+        recordData = recordResponse;
+        categoryModel = categoryResponse;
+        _hasMore = false;
+      });
+    });
   }
   @override
   void dispose() {
@@ -239,8 +253,10 @@ class _allRecordsState extends State<allRecords> {
                 return NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo){
                     if(scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent){
+                      //_hasMore = recordData.records.length < recordData.pagination.count;
                       setState(() {
                         _hasMore = recordData.records.length < recordData.pagination.count;
+                        nextUrl = recordData.pagination.nextUrl;
                       });
                     }
                   },
@@ -248,7 +264,7 @@ class _allRecordsState extends State<allRecords> {
                     hasMore: () => _hasMore,
                     itemCount: () => recordData.records.length,
                     loadMore: () async {
-                      await _loadMoreItems();
+                      await _loadMoreItems(nextUrl);
                     },
                     onLoadMore: () {
                       setState(() {
@@ -260,7 +276,7 @@ class _allRecordsState extends State<allRecords> {
                         _loadingMore = false;
                       });
                     },
-                    loadMoreOffsetFromBottom:0,
+                    loadMoreOffsetFromBottom: 0,
                     itemBuilder: (context, index){
                       final record = recordData.records[index];
 
@@ -338,6 +354,7 @@ class _allRecordsState extends State<allRecords> {
                         textColor = Colors.green;
                       }
                       if((_loadingMore ?? false) && index == recordData.records.length - 1){
+                        print("loadMore "+ recordData.records.length.toString());
                         if(_loadingMore)
                           {
                             return Center(child: SpinKitWave(color: Colors.blueGrey, type: SpinKitWaveType.center),);

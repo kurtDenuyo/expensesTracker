@@ -146,6 +146,9 @@ class _LoginPageState extends State<LoginPage>{
                                         fontFamily: 'Nunito-Regular'
                                     ),
                                   ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
                                   TextFormField(
                                     cursorColor: Colors.green,
                                     decoration: InputDecoration(
@@ -186,7 +189,7 @@ class _LoginPageState extends State<LoginPage>{
                                       //on success navigate to dashboard
                                       await storage.write(key: "email", value: _emailController.text);
                                        await storage.write(key: "password", value: _passwordController.text);
-                                      print("Login success with username"+result.user.email);
+                                      print("Login success with token "+result.token);
                                        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(result)),);
                                     }
                                     else

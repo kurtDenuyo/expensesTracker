@@ -20,7 +20,6 @@ class editRecent extends StatefulWidget {
 }
 
 class _editRecentState extends State<editRecent>{
-  TabController _controller;
   final TextEditingController _categoryController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _notesController = TextEditingController();
@@ -29,10 +28,12 @@ class _editRecentState extends State<editRecent>{
   final TextEditingController _timeController = TextEditingController();
   int _recordTypeController = 0;
   int categoryId;
+  String month = "";
   List<bool> isSelected = [true, false];
   FocusNode focusIncome = FocusNode();
   FocusNode focusExpenses = FocusNode();
   List<FocusNode> focusToggle;
+  var _savedDate, _savedTime;
   @override
   void initState() {
     super.initState();
@@ -40,12 +41,8 @@ class _editRecentState extends State<editRecent>{
     _notesController.text = widget.record.records[widget.index].notes;
     _amountController.text = widget.record.records[widget.index].amount.toString();
     categoryId = widget.record.records[widget.index].category.id;
-  }
-  @override
-  Widget build(BuildContext context) {
-
-
-    String month = "";
+    _savedDate = widget.record.records[widget.index].date;
+    _savedTime = widget.record.records[widget.index].date;
     switch(DateTime.now().month.toInt()) {
       case 1: {
         month = "Jan";
@@ -111,8 +108,18 @@ class _editRecentState extends State<editRecent>{
       break;
     }
     _dateController.text = month+"-"+widget.record.records[widget.index].date.day.toString()+"-"+widget.record.records[widget.index].date.year.toString();
-    _timeController.text = DateTime.now().hour.toString()+":"+DateTime.now().minute.toString();
+    _timeController.text = widget.record.records[widget.index].date.hour.toString()+":"+ widget.record.records[widget.index].date.minute.toString();
 
+  }
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    focusIncome.dispose();
+    focusExpenses.dispose();
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         centerTitle: true,
@@ -345,6 +352,7 @@ class _editRecentState extends State<editRecent>{
                                         }
                                         break;
                                       }
+                                      _savedDate = date;
                                       _dateController.text = month+"-"+date.day.toString()+"-"+date.year.toString();
                                       print('confirm $date');
                                     },
@@ -375,7 +383,7 @@ class _editRecentState extends State<editRecent>{
                                     print('change $time');
                                   },
                                   onConfirm: (time) {
-                                    //_dateController.text = date.toIso8601String();
+                                    _savedTime = time;
                                     _timeController.text = time.hour.toString()+":"+time.minute.toString();
                                     print('confirm $time');
                                   },
@@ -457,7 +465,7 @@ class _editRecentState extends State<editRecent>{
             "amount": _amountController.text,
             "notes": _notesController.text,
             "record_type": _recordTypeController,
-            "date": _dateController.text,
+            "date": new DateTime(_savedDate.year, _savedDate.month, _savedDate.day, _savedTime.hour, _savedTime.minute).toIso8601String(),
             "category_id": categoryId,
           }
         };

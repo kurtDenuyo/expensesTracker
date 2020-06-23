@@ -93,6 +93,7 @@ class HomeState extends State<Home> {
           child: Padding(
               padding:EdgeInsets.all(20.0),
               child: ListView(
+                scrollDirection: Axis.vertical,
                 children: <Widget>[
                   Container(
                     decoration: BoxDecoration(
