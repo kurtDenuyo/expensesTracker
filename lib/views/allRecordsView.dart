@@ -17,14 +17,14 @@ class allRecords extends StatefulWidget {
 }
 class _allRecordsState extends State<allRecords> {
   int present, perPage;
-  RecordsModel recordData, searchResults, paginationRecord;
+  RecordsModel recordData, searchResults, paginationRecord, searchpaginationRecord;
   CategoryModel categoryModel;
-  bool _hasData, _hasMore, _loadingMore;
+  bool _hasData, _hasMore, _loadingMore, _searchLoadingMore;
   bool activeSearch;
-  bool _searchHasData;
+  bool _searchHasData, _searchHasMore;
   Future _initialLoad;
   String nextUrl;
-  final TextEditingController _searchText = TextEditingController();
+  TextEditingController _searchText = TextEditingController();
   Color textColor = Colors.green;
   static const API = 'http://expenses.koda.ws/';
   Future _loadMoreItems(String next) async {
@@ -41,11 +41,45 @@ class _allRecordsState extends State<allRecords> {
 
     });
   }
+  Future _loadMoreSearchedItems(String next) async {
+    await Future.delayed(Duration(seconds: 3), () async{
+      searchpaginationRecord = await dataProvider().loadMoreSearchResults(widget.currentUsers, next);
+      setState(() {
+        nextUrl = searchpaginationRecord.pagination.nextUrl;
+        searchResults.records.addAll(searchpaginationRecord.records);
+        _searchHasMore = searchResults.records.length < searchResults.pagination.count;
+        print("New Total "+ searchResults.records.length.toString());
+        print("Current page "+ searchpaginationRecord.pagination.current.toString());
+        print("has more? "+ _searchHasMore.toString());
+      });
+
+    });
+  }
+  void _search(String value) async{
+    print("Search this "+value);
+    final searchResponse = await dataProvider().searchRecord(widget.currentUsers, value);
+
+    if(searchResponse.records.length>0){
+      setState(() {
+        searchResults = searchResponse;
+        _searchHasData = true;
+        _searchHasMore = false;
+      });
+    }
+    else
+      {
+        setState(() {
+          _searchHasData = false;
+          _searchHasMore = false;
+        });
+      }
+  }
   @override
   void initState() {
     super.initState();
     activeSearch = false;
     _searchHasData = false;
+    _hasData = false;
     _initialLoad = Future.delayed(Duration(seconds: 3),() async{
       RecordsModel recordResponse = await dataProvider().fetchRecords(widget.currentUsers);
       final categoryResponse = await dataProvider().fetchCategory();
@@ -53,11 +87,14 @@ class _allRecordsState extends State<allRecords> {
       print("Category "+ categoryResponse.categories.length.toString());
       recordData = recordResponse;
       categoryModel = categoryResponse;
+      if(recordData.records.length>0)
+        {
+          _hasData = true;
+        }
       _hasMore = false;
     });
   }
-  void _refreshHome() async{
-    setState(() {
+  void _refreshHome() async{    setState(() {
       _initialLoad = Future.delayed(Duration(seconds: 1),() async{
         RecordsModel recordResponse = await dataProvider().fetchRecords(widget.currentUsers);
         final categoryResponse = await dataProvider().fetchCategory();
@@ -66,6 +103,9 @@ class _allRecordsState extends State<allRecords> {
         recordData = recordResponse;
         categoryModel = categoryResponse;
         _hasMore = false;
+        _searchText.text = "";
+        activeSearch = false;
+        _searchHasData = false;
       });
     });
   }
@@ -135,113 +175,167 @@ class _allRecordsState extends State<allRecords> {
     return Scaffold(
         appBar: _appBar(),
         body: (_searchHasData)?
-        Container(
-            height: 1000.0,
-            child: ListView.builder(
-              scrollDirection: Axis.vertical,
-              padding:EdgeInsets.only(left: 20.0,right: 20.0),
-              shrinkWrap: true,
-              itemCount: (_searchHasData) ? searchResults.records.length : 0,
-              itemBuilder: (BuildContext contex, int index)
+        NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo){
+            if(scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent){
+              //_hasMore = recordData.records.length < recordData.pagination.count;
+              setState(() {
+                _searchHasMore = searchResults.records.length < searchResults.pagination.count;
+                nextUrl = searchResults.pagination.nextUrl;
+              });
+            }
+          },
+          child: IncrementallyLoadingListView(
+            hasMore: () => _searchHasMore,
+            itemCount: () => searchResults.records.length,
+            loadMore: () async {
+              await _loadMoreSearchedItems(nextUrl);
+            },
+            onLoadMore: () {
+              setState(() {
+                _searchLoadingMore = true;
+              });
+            },
+            onLoadMoreFinished: () {
+              setState(() {
+                _searchLoadingMore = false;
+              });
+            },
+            loadMoreOffsetFromBottom: 0,
+            itemBuilder: (context, index){
+              final record = searchResults.records[index];
+
+              String month = "";
+              switch(searchResults.records[index].date.month) {
+                case 1: {
+                  month = "Jan";
+                  print(month);
+                }
+                break;
+
+                case 2: {
+                  month = "Feb";
+                  print(month);
+                }
+                break;
+                case 3: {
+                  month = "Mar";
+                  print(month);
+                }
+                break;
+                case 4: {
+                  month = "Apr";
+                  print(month);
+                }
+                break;
+                case 5: {
+                  month = "May";
+                  print(month);
+                }
+                break;
+                case 6: {
+                  month = "Jun";
+                  print(month);
+                }
+                break;
+                case 7: {
+                  month = "July";
+                  print(month);
+                }
+                break;
+                case 8: {
+                  month = "Aug";
+                  print(month);
+                }
+                break;
+                case 9: {
+                  month = "Sep";
+                  print(month);
+                }
+                break;
+                case 10: {
+                  month = "Oct";
+                  print(month);
+                }
+                break;
+                case 11: {
+                  month = "Nov";
+                  print(month);
+                }
+                break;
+
+                default: {
+                  month = "Dec";
+                  print(month);
+                }
+                break;
+              }
+              if(searchResults.records[index].recordType==1)
               {
-                String month = "";
-                switch(searchResults.records[index].date.month) {
-                  case 1: {
-                    month = "Jan";
-                    print(month);
-                  }
-                  break;
-
-                  case 2: {
-                    month = "Feb";
-                    print(month);
-                  }
-                  break;
-                  case 3: {
-                    month = "Mar";
-                    print(month);
-                  }
-                  break;
-                  case 4: {
-                    month = "Apr";
-                    print(month);
-                  }
-                  break;
-                  case 5: {
-                    month = "May";
-                    print(month);
-                  }
-                  break;
-                  case 6: {
-                    month = "Jun";
-                    print(month);
-                  }
-                  break;
-                  case 7: {
-                    month = "July";
-                    print(month);
-                  }
-                  break;
-                  case 8: {
-                    month = "Aug";
-                    print(month);
-                  }
-                  break;
-                  case 9: {
-                    month = "Sep";
-                    print(month);
-                  }
-                  break;
-                  case 10: {
-                    month = "Oct";
-                    print(month);
-                  }
-                  break;
-                  case 11: {
-                    month = "Nov";
-                    print(month);
-                  }
-                  break;
-
-                  default: {
-                    month = "Dec";
-                    print(month);
-                  }
-                  break;
-                }
-                if(searchResults.records[index].recordType==1)
+                textColor = Colors.red;
+              }
+              else
+              {
+                textColor = Colors.green;
+              }
+              if((_searchLoadingMore ?? false) && index == searchResults.records.length - 1){
+                print("loadMore "+ searchResults.records.length.toString());
+                if(_searchLoadingMore)
                 {
-                  textColor = Colors.red;
+                  return Center(child: SpinKitWave(color: Colors.blueGrey, type: SpinKitWaveType.center),);
                 }
-                else
-                {
-                  textColor = Colors.green;
+                else{
+                  return ListTile(
+                    //contentPadding: EdgeInsets.all(0.0),
+                    title: Text("₱ "+record.amount.toString(),
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: textColor,
+                      ),),
+                    subtitle: Text(record.category.name.toString()+"  ---"+ record.notes.toString(),
+                      style: TextStyle(
+                          fontSize: 15.0
+                      ),),
+                    leading: Image.network(API+
+                        categoryModel.categories[record.category.id-1].icon,
+                        fit: BoxFit.fill),
+                    trailing: Text(month+" "+record.date.day.toString()+" , "+record.date.year.toString(),
+                      style: TextStyle(
+                        fontSize: 10.0,
+                      ),),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, searchResults, index)))
+                          .then((value) => value?_refreshHome():null);
+                    },
+                  );
                 }
-                return ListTile(
-                  //contentPadding: EdgeInsets.all(0.0),
-                  title: Text("₱ "+searchResults.records[index].amount.toString(),
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      color: textColor,
-                    ),),
-                  subtitle: Text(searchResults.records[index].category.name.toString()+"  ---"+ searchResults.records[index].notes.toString(),
-                    style: TextStyle(
-                        fontSize: 15.0
-                    ),),
-                  leading: Image.network(API+
-                      categoryModel.categories[searchResults.records[index].category.id-1].icon,
-                      fit: BoxFit.fill),
-                  trailing: Text(month+" "+searchResults.records[index].date.day.toString()+" , "+searchResults.records[index].date.year.toString(),
-                    style: TextStyle(
-                      fontSize: 10.0,
-                    ),),
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, searchResults, index)))
-                        .then((value) => value?_refreshHome():null);
-                  },
-                );
-              },
-            ),
+
+              }
+              return ListTile(
+                //contentPadding: EdgeInsets.all(0.0),
+                title: Text("₱ "+record.amount.toString(),
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: textColor,
+                  ),),
+                subtitle: Text(record.category.name.toString()+"  ---"+ record.notes.toString(),
+                  style: TextStyle(
+                      fontSize: 15.0
+                  ),),
+                leading: Image.network(API+
+                    categoryModel.categories[record.category.id-1].icon,
+                    fit: BoxFit.fill),
+                trailing: Text(month+" "+record.date.day.toString()+" , "+record.date.year.toString(),
+                  style: TextStyle(
+                    fontSize: 10.0,
+                  ),),
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => editRecord(widget.currentUsers, searchResults, index)))
+                      .then((value) => value?_refreshHome():null);
+                },
+              );
+            },
+          ),
         )
         :FutureBuilder(
           future: _initialLoad,
@@ -419,22 +513,7 @@ class _allRecordsState extends State<allRecords> {
         )
     );
   }
-  void _search(String value) async{
-    print("Search this "+value);
-    final recordResponse = await dataProvider().searchRecord(widget.currentUsers, value);
 
-    if(recordResponse.records.length>0){
-      setState(() {
-        searchResults = recordResponse;
-        _searchHasData = true;
-      });
-    }
-    else
-    {
-      _searchHasData = false;
-    }
-
-  }
 }
 
 

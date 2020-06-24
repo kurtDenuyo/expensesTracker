@@ -168,13 +168,18 @@ class dataProvider {
         HttpHeaders.authorizationHeader: "Bearer $_token"
       },
     );
-
-    //print("Response content "+response.body);
-    //print("Token "+_token);
-
     final result = recordsModelFromJson(response.body);
-    //print(result.records.length.toString());
-    //print("result from json"+result.records[1].amount.toString());
+    return result;
+  }
+  Future<RecordsModel> loadMoreSearchResults(UserModel currentUsers, String url) async{
+    _token = currentUsers.token;
+    final response = await http.get(
+      API + url,
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_token"
+      },
+    );
+    final result = recordsModelFromJson(response.body);
     return result;
   }
 }

@@ -38,7 +38,7 @@ class _createRecordState extends State<createRecord> {
     _categoryController.text = "Food & Drinks";
     categoryId = 1;
     _savedDate = DateTime.now();
-    _savedDate = DateTime.now();
+    _savedTime = DateTime.now();
     switch (DateTime.now().month.toInt()) {
       case 1:
         {
@@ -468,6 +468,7 @@ class _createRecordState extends State<createRecord> {
               );
             });
       } else {
+        print("Time check "+ _savedTime.hour.toString());
         final record = {
           "record": {
             "amount": _amountController.text,
